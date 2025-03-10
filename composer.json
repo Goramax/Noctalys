@@ -1,0 +1,20 @@
+{
+    "name": "goramax/noctalys-framework",
+    "description": "A Simple PHP Lightweight Framework",
+    "version": "0.0.0",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Goramax\\NoctalysFramework\\": "src/Noctalys/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Goramax"
+        }
+    ],
+    "require": {
+        "php": ">=8.2"
+    }
+}
