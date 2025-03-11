@@ -8,7 +8,6 @@ Noctalys is a simple, lightweight PHP framework designed for simple and fast dev
 
 TODO : add CLI installer with demo site
 
-
 ## Documentation
 - [Getting Started](./doc/getting-started.md)
 - [Create Pages](./doc/pages.md)
