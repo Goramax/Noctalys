@@ -2,8 +2,13 @@
 
 namespace Goramax\NoctalysFramework;
 
+use Goramax\NoctalysFramework\Router;
+
 class Core {
     public function run() {
-        echo "Running Noctalys Framework";
+        ob_start();
+        Router::dispatch();
+        $output = ob_get_clean();
+        echo $output;
     }
 }
