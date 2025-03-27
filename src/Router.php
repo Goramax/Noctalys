@@ -2,7 +2,9 @@
 
 namespace Goramax\NoctalysFramework;
 
+use Error;
 use Goramax\NoctalysFramework\Config;
+use Noctalys\NoctalysApp\Frontend\Pages\Error\ErrorController;
 
 class Router
 {
@@ -10,6 +12,8 @@ class Router
     private static $page_dirs;
     private static $directories;
     private static $errorPage;
+    private static $params;
+    private static $currentPath;
 
     /**
      * Initialize static properties
@@ -22,6 +26,8 @@ class Router
         foreach (self::$directories as $directory) {
             self::$page_dirs[] = getcwd() . "/" . $directory["path"] . "/" . $directory["folder_name"];
         }
+        self::$params = [];
+        self::$currentPath = null;
     }
 
     /**
@@ -30,10 +36,22 @@ class Router
      */
     private static function autoDiscoverRoutes()
     {
-        return "NOT IMPLEMENTED";
+        return "NOT IMPLEMENTED YET";
         // Implementation would need to iterate through all directories in self::$page_dirs
     }
 
+    /**
+     * Get the current folder from which the view is called
+     * @return string
+     */
+    public static function getCurrentFolder(): string
+    {
+        $path = explode('/', self::$currentPath);
+        array_pop($path);
+        $currentFolder = implode('/', $path);
+        return $currentFolder;
+    }
+    
     /**
      * Get the current route from the URL
      * 
@@ -107,9 +125,12 @@ class Router
     {
         $folder_name = basename($folder_path);
         $param_folder = $folder_path . '/' . $folder_name . '_param';
+        //echo($param_folder);
         if (is_dir($param_folder)) {
+            //echo " true <br>";
             return true;
         }
+        //echo " false <br>";
         return false;
     }
 
@@ -117,12 +138,11 @@ class Router
      * Loop through the directories and check if a route with parameters exists
      * 
      * @param array $current_route
-     * @return array|null
+     * @return string|null
      */
-    private static function findParamControllerFile(array $current_route_array): array|null
+    private static function findParamControllerFile(array $current_route_array): string|null
     {
         $file_path = [];
-        $params = [];
         $page_dir = null;
         foreach (self::$page_dirs as $page_dir) {
             foreach ($current_route_array as $index => $current_route) {
@@ -142,10 +162,10 @@ class Router
                     }
                     // else if has _param folder, add it to the params array and file_path array
                     else if (self::hasParamFolders($page_dir . '/' . $current_route)) {
-                        $params[$current_route] = $current_route_array[$index + 1];
+                        self::$params[$current_route] = $current_route_array[$index + 1];
                         $file_path[] = $current_route . '_param';
                     } else if (self::hasParamFolders($page_dir . '/' . self::arrayToPath($file_path))) {
-                        $params[$current_route] = $current_route_array[$index];
+                        self::$params[$current_route] = $current_route_array[$index + 1];
                         $file_path[] = $file_path[$index - 1] . '_param';
                     } else {
                         return null;
@@ -153,17 +173,15 @@ class Router
                 }
             }
         };
-        return ['folderPath' => $page_dir . '/' . self::arrayToPath($file_path), 'params' => $params];
+        return $page_dir . '/' . self::arrayToPath($file_path);
     }
 
     /**
      * Get parameters from the URL
      * @return array
      */
-    private static function getParams(): array {
-        // TODO: -- REMOVE PARAMS FROM findParamControllerFile AND USE THIS FUNCTION TO GET PARAMS FROM CONTROLLER --
-        // Todo: also fix nested params detection
-        return [];
+    public static function getParams(): array {
+        return self::$params;
     }
 
     /**
@@ -175,13 +193,14 @@ class Router
     {
         $controllerFile = self::findControllerFile(self::$errorPage);
         if (!$controllerFile) {
-            echo "Controller file not found at " . self::$errorPage;
-            return;
+            throw new Error("Controller file not found at " . self::$errorPage);
         }
+        self::$currentPath = $controllerFile;
         require_once $controllerFile;
         $controllerClass = self::findControllerClass($controllerFile);
         if ($controllerClass) {
-            $controller = new $controllerClass();
+            http_response_code($code);
+            $controller = new $controllerClass;
             $controller->main();
         }
     }
@@ -210,17 +229,20 @@ class Router
             // scan for _param folders
             $paramRoute = self::findParamControllerFile($current_route_array);
             if ($paramRoute !== null) {
-                $controllerFolder = $paramRoute['folderPath'];
-                $params =  $paramRoute['params'];
-                var_dump($params);
+                $controllerFolder = $paramRoute;
+                $params =  self::getParams();
+                //var_dump($params);
                 $controllerFile = self::findControllerFile($controllerFolder);
             }
         }
-        if ($controllerFile === null) {
+        // If there is no controller file or the page corresponds to the error page (404)
+        if ($controllerFile === null || $page_dir.$current_route === self::$errorPage){
             // 404
             self::error("404");
             return;
         }
+        self::$currentPath = $controllerFile;
+        //echo "folder" . self::$currentPath;
         require_once $controllerFile;
         $controllerClass = self::findControllerClass($controllerFile);
 

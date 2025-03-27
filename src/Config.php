@@ -31,10 +31,31 @@ class Config
      * 
      * @return array
      */
-    public static function get_router_config(): mixed{
+    public static function get_router_config(): array{
         $config = self::get_config();
         return $config['router'];
     }
+
+    /**
+     * Get the layout source folders from the config file
+     * 
+     * @return array
+     */
+    public static function get_layout_config(): array{
+        $config = self::get_config();
+        return $config['layouts'];
+    }
+
+    /**
+     * Get the component source folders from the config file
+     * 
+     * @return array
+     */
+    public static function get_layout_config_file(): array{
+        $config = self::get_layout_config();
+        return $config['components'];
+    }
+
 }
 
 Config::init();

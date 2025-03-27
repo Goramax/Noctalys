@@ -1,23 +1,25 @@
 <?php
 
 namespace Goramax\NoctalysFramework;
+use Goramax\NoctalysFramework\Router;
+use Goramax\NoctalysFramework\Finder;
 
 class View {
     private static bool $rendered = false;
 
     public static function render(string $view, array $data = [], string $layout = 'default'): void {
         if (self::$rendered) return;
-        self::$rendered = true;
+
+        $view = Router::getCurrentFolder() . "/$view.view.php";
 
         extract($data);
+
+        $layout = Finder::findLayout($layout);
         ob_start();
-        // check if the layout file exists
-        // if (!file_exists(getcwd() . "/src/Frontend/layouts/$layout.view.php")) {
-        //     throw new \Exception("Layout file not found: $layout");
-        // }
-        // require getcwd() . "/src/Frontend/layouts/$layout.view.php"; //TODO Layouts
-        $content = ob_get_clean();
-        require getcwd() . "/src/Frontend/pages/$view/$view.view.php";
+        require $view;
+        $view = ob_get_clean();
+        require $layout;
+        self::$rendered = true;
 
     }
 }
