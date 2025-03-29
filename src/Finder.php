@@ -32,7 +32,7 @@ class Finder
     public static function findLayout($fileName): string
     {
         try {
-            $directories = Config::get_layout_config();
+            $directories = Config::get("layouts");
             return self::findFile($fileName . ".layout.php", $directories);
         } catch (\Exception $e) {
             throw new \Exception("Layout file not found: $fileName");
@@ -47,7 +47,7 @@ class Finder
     public static function findComponent($fileName): string
     {
         try {
-            $directories = Config::get_component_config();
+            $directories = Config::get("components");
             $file = self::findFile($fileName . ".component.php", $directories);
             return $file;
         } catch (\Exception $e) {

@@ -21,8 +21,8 @@ class Router
     public static function init(): void
     {
         // change to an array of directories
-        self::$directories = Config::get_router_config()["page_scan"];
-        self::$errorPage = getcwd()."/".Config::get_router_config()["error_page"];
+        self::$directories = Config::get("router")["page_scan"];
+        self::$errorPage = getcwd()."/".Config::get("router")["error_page"];
         foreach (self::$directories as $directory) {
             self::$pageDirs[] = getcwd() . "/" . $directory["path"] . "/" . $directory["folder_name"];
         }

@@ -5,10 +5,26 @@ namespace Goramax\NoctalysFramework;
 class Config
 {
 
-    private static string $config_file;
+    private static string $configFile;
+    private static mixed $configContent;
     public static function init(): void
     {
-        self::$config_file = getcwd() . '/config.json'; // TODO: use absolute path
+        self::$configFile = getcwd() . '/config.json'; // TODO: use absolute path
+        self::$configContent = self::getConfigContent();
+    }
+
+    /**
+     * Get the configuration from the config file
+     * @param string $key
+     * @return array
+     */
+    public static function get(string $key): mixed
+    {
+        if (array_key_exists($key,  self::$configContent)) {
+            return self::$configContent[$key];
+        } else {
+            throw new \Exception("Key not found in config file: $key");
+        }
     }
 
     /**
@@ -16,44 +32,14 @@ class Config
      * 
      * @return array
      */
-    public static function get_config(){
-        $config_file = self::$config_file;
-        if(file_exists($config_file)){
-            $config = json_decode(file_get_contents($config_file), true);
+    private static function getConfigContent(){
+        $configFile = self::$configFile;
+        if(file_exists($configFile)){
+            $config = json_decode(file_get_contents($configFile), true);
             return $config;
         } else {
-            throw new \Exception("Config file not found: $config_file");
+            throw new \Exception("Config file not found: $configFile");
         }
-    }
-
-    /**
-     * Get the router configuration from the config file
-     * 
-     * @return array
-     */
-    public static function get_router_config(): array{
-        $config = self::get_config();
-        return $config['router'];
-    }
-
-    /**
-     * Get the layout source folders from the config file
-     * 
-     * @return array
-     */
-    public static function get_layout_config(): array{
-        $config = self::get_config();
-        return $config['layouts'];
-    }
-
-    /**
-     * Get the component source folders from the config file
-     * 
-     * @return array
-     */
-    public static function get_component_config(): array{
-        $config = self::get_config();
-        return $config['components'];
     }
 
 }
