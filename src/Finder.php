@@ -47,7 +47,7 @@ class Finder
     public static function findComponent($fileName): string
     {
         try {
-            $directories = Config::get_layout_config_file();
+            $directories = Config::get_component_config();
             $file = self::findFile($fileName . ".component.php", $directories);
             return $file;
         } catch (\Exception $e) {

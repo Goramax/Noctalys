@@ -51,8 +51,8 @@ class Config
      * 
      * @return array
      */
-    public static function get_layout_config_file(): array{
-        $config = self::get_layout_config();
+    public static function get_component_config(): array{
+        $config = self::get_config();
         return $config['components'];
     }
 

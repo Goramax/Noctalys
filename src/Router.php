@@ -9,7 +9,7 @@ use Noctalys\NoctalysApp\Frontend\Pages\Error\ErrorController;
 class Router
 {
 
-    private static $page_dirs;
+    private static $pageDirs;
     private static $directories;
     private static $errorPage;
     private static $params;
@@ -24,7 +24,7 @@ class Router
         self::$directories = Config::get_router_config()["page_scan"];
         self::$errorPage = getcwd()."/".Config::get_router_config()["error_page"];
         foreach (self::$directories as $directory) {
-            self::$page_dirs[] = getcwd() . "/" . $directory["path"] . "/" . $directory["folder_name"];
+            self::$pageDirs[] = getcwd() . "/" . $directory["path"] . "/" . $directory["folder_name"];
         }
         self::$params = [];
         self::$currentPath = null;
@@ -37,7 +37,7 @@ class Router
     private static function autoDiscoverRoutes()
     {
         return "NOT IMPLEMENTED YET";
-        // Implementation would need to iterate through all directories in self::$page_dirs
+        // Implementation would need to iterate through all directories in self::$pageDirs
     }
 
     /**
@@ -144,7 +144,7 @@ class Router
     {
         $file_path = [];
         $page_dir = null;
-        foreach (self::$page_dirs as $page_dir) {
+        foreach (self::$pageDirs as $page_dir) {
             foreach ($current_route_array as $index => $current_route) {
                 if ($index + 1 < count($current_route_array)) {
                     //check if directory exists
@@ -215,10 +215,9 @@ class Router
         $controllerFile = null;
         $current_route_array = explode('/', $current_route);
         $paramRoute = [];
-        $params = []; // array to store the parameters (key-value pairs)
-
+        
         // Try to find the controller file in any of the page directories
-        foreach (self::$page_dirs as $page_dir) {
+        foreach (self::$pageDirs as $page_dir) {
             $potential_controller = self::findControllerFile($page_dir . $current_route);
             if ($potential_controller !== null) {
                 $controllerFile = $potential_controller;
