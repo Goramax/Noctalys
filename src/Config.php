@@ -9,7 +9,7 @@ class Config
     private static mixed $configContent;
     public static function init(): void
     {
-        self::$configFile = getcwd() . '/config.json'; // TODO: use absolute path
+        self::$configFile = DIRECTORY . '/config.json';
         self::$configContent = self::getConfigContent();
     }
 

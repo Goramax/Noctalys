@@ -22,9 +22,9 @@ class Router
     {
         // change to an array of directories
         self::$directories = Config::get("router")["page_scan"];
-        self::$errorPage = getcwd()."/".Config::get("router")["error_page"];
+        self::$errorPage = DIRECTORY."/".Config::get("router")["error_page"];
         foreach (self::$directories as $directory) {
-            self::$pageDirs[] = getcwd() . "/" . $directory["path"] . "/" . $directory["folder_name"];
+            self::$pageDirs[] = DIRECTORY . "/" . $directory["path"] . "/" . $directory["folder_name"];
         }
         self::$params = [];
         self::$currentPath = null;

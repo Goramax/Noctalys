@@ -3,7 +3,6 @@
 namespace Goramax\NoctalysFramework;
 
 use Goramax\NoctalysFramework\Config;
-
 class Env
 {
     private static bool $loaded = false;
@@ -26,7 +25,7 @@ class Env
     private static function loadEnvFile($envType = ''): void
     {
         if (self::$loaded) return;
-        $envPath = getcwd() . '/.env' . ($envType ? '.'.$envType :'');
+        $envPath = DIRECTORY . '/.env' . ($envType ? '.'.$envType :'');
         if (file_exists($envPath)) {
             $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $line) {
