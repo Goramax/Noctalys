@@ -5,6 +5,7 @@ namespace Goramax\NoctalysFramework;
 use Error;
 use Goramax\NoctalysFramework\Config;
 use Noctalys\NoctalysApp\Frontend\Pages\Error\ErrorController;
+use Goramax\NoctalysFramework\Hooks;
 
 class Router
 {
@@ -22,7 +23,7 @@ class Router
     {
         // change to an array of directories
         self::$directories = Config::get("router")["page_scan"];
-        self::$errorPage = DIRECTORY."/".Config::get("router")["error_page"];
+        self::$errorPage = DIRECTORY . "/" . Config::get("router")["error_page"];
         foreach (self::$directories as $directory) {
             self::$pageDirs[] = DIRECTORY . "/" . $directory["path"] . "/" . $directory["folder_name"];
         }
@@ -51,7 +52,7 @@ class Router
         $currentFolder = implode('/', $path);
         return $currentFolder;
     }
-    
+
     /**
      * Get the current route from the URL
      * 
@@ -96,8 +97,16 @@ class Router
     {
         try {
             $contents = file_get_contents($file);
-            if (preg_match('/class\s+(\w+)/', $contents, $matches)) {
-                return $matches[1];
+            // Detect namespace
+            $namespace = null;
+            if (preg_match('/^namespace\s+(.+?);/m', $contents, $nsMatch)) {
+                $namespace = trim($nsMatch[1]);
+            }
+
+            // Detect class name
+            if (preg_match('/class\s+(\w+)/', $contents, $classMatch)) {
+                $className = $classMatch[1];
+                return $namespace ? "$namespace\\$className" : $className;
             }
             return null;
         } catch (\Exception $e) {
@@ -144,14 +153,15 @@ class Router
     {
         $file_path = [];
         $page_dir = null;
+        $constructedParamRoute = '';
         foreach (self::$pageDirs as $page_dir) {
             foreach ($current_route_array as $index => $current_route) {
                 if ($index + 1 < count($current_route_array)) {
                     //check if directory exists
-                    if (!is_dir(filename: $page_dir . '/' . $current_route) && !is_dir($page_dir . '/' . self::arrayToPath($file_path) . "/" . $file_path[count($file_path) - 1] . '_param')) {
+                    if (!is_dir(filename: $page_dir . '/' . $constructedParamRoute . $current_route) && !is_dir($page_dir . '/' . self::arrayToPath($file_path) . "/" . $file_path[count($file_path) - 1] . '_param')) {
                         return null;
                     }
-                    $folders = scandir($page_dir . '/' . self::arrayToPath($file_path));
+                    $folders = scandir($page_dir . '/' . $constructedParamRoute . self::arrayToPath($file_path));
                     // check if the folder contains other folders
                     if (!$folders) {
                         break;
@@ -161,10 +171,10 @@ class Router
                         $file_path[] = $current_route_array[$index + 1];
                     }
                     // else if has _param folder, add it to the params array and file_path array
-                    else if (self::hasParamFolders($page_dir . '/' . $current_route)) {
+                    else if (self::hasParamFolders($page_dir . '/' . $constructedParamRoute . $current_route)) {
                         self::$params[$current_route] = $current_route_array[$index + 1];
                         $file_path[] = $current_route . '_param';
-                    } else if (self::hasParamFolders($page_dir . '/' . self::arrayToPath($file_path))) {
+                    } else if (self::hasParamFolders($page_dir . '/' . $constructedParamRoute . self::arrayToPath($file_path))) {
                         self::$params[$current_route] = $current_route_array[$index + 1];
                         $file_path[] = $file_path[$index - 1] . '_param';
                     } else {
@@ -180,7 +190,8 @@ class Router
      * Get parameters from the URL
      * @return array
      */
-    public static function getParams(): array {
+    public static function getParams(): array
+    {
         return self::$params;
     }
 
@@ -215,7 +226,8 @@ class Router
         $controllerFile = null;
         $current_route_array = explode('/', $current_route);
         $paramRoute = [];
-        
+        Hooks::run("before_dispatch", $current_route);
+
         // Try to find the controller file in any of the page directories
         foreach (self::$pageDirs as $page_dir) {
             $potential_controller = self::findControllerFile($page_dir . $current_route);
@@ -235,9 +247,10 @@ class Router
             }
         }
         // If there is no controller file or the page corresponds to the error page (404)
-        if ($controllerFile === null || $page_dir.$current_route === self::$errorPage){
+        if ($controllerFile === null || $page_dir . $current_route === self::$errorPage) {
             // 404
             self::error("404");
+            Hooks::run("after_dispatch", $current_route, $current_route_array);
             return;
         }
         self::$currentPath = $controllerFile;
@@ -249,6 +262,7 @@ class Router
             $controller = new $controllerClass();
             $controller->main();
         }
+        Hooks::run("after_dispatch", $current_route);
     }
 
     /**
