@@ -59,9 +59,9 @@ class Env
      */
     public static function get(string $key, $default = null): mixed
     {
-        if (!isset(self::$vars[$key])){
-            trigger_error("Environment variable '$key' is not set.", E_USER_WARNING);
-        }
+        // if (!isset(self::$vars[$key])){
+        //     trigger_error("Environment variable '$key' is not set.", E_USER_WARNING);
+        // }
         return self::$vars[$key] ?? $default;
     }
 }

@@ -13,7 +13,7 @@ class Finder
      * @param array $directories config directories
      * @return string path to the file
      */
-    private static function findFile($fileName, $directories): string | null
+    private static function findFile(string $fileName, array $directories): string | null
     {
         foreach ($directories['sources'] as $directory) {
             $file = $directory['path'] . '/' . $directory['folder_name'] . '/' . $fileName;
