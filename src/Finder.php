@@ -21,7 +21,7 @@ class Finder
         foreach ($directories['sources'] as $directory) {
             $base = $directory['path'] . DIRECTORY_SEPARATOR . $directory['folder_name'];
             $file = $base . DIRECTORY_SEPARATOR . $fileName;
-            if (!$limitDirectories) {
+            if (!$nested) {
                 if (file_exists($file)) {
                     return $file;
                 }
@@ -46,9 +46,6 @@ class Finder
                             }
                         }
                     }
-                }
-                if (is_file($base . DIRECTORY_SEPARATOR . $fileName)) {
-                    return $base . DIRECTORY_SEPARATOR . $fileName;
                 }
             }
         }
