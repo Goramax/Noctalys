@@ -3,6 +3,7 @@
 namespace Goramax\NoctalysFramework;
 
 use Goramax\NoctalysFramework\Config;
+use RecursiveArrayIterator;
 
 class Finder
 {
@@ -11,17 +12,47 @@ class Finder
      * 
      * @param string $fileName file name
      * @param array $directories config directories
+     * @param bool $nested if true, will search in nested directories
+     * @param array $limitDirectories directories to limit nested search
      * @return string path to the file
      */
-    private static function findFile(string $fileName, array $directories): string | null
+    public static function findFile(string $fileName, array $directories, bool $nested = false, array $limitDirectories = []): string | null
     {
         foreach ($directories['sources'] as $directory) {
-            $file = $directory['path'] . '/' . $directory['folder_name'] . '/' . $fileName;
-            if (file_exists($file)) {
-                return $file;
+            $base = $directory['path'] . DIRECTORY_SEPARATOR . $directory['folder_name'];
+            $file = $base . DIRECTORY_SEPARATOR . $fileName;
+            if (!$limitDirectories) {
+                if (file_exists($file)) {
+                    return $file;
+                }
+            }
+            if ($nested) {
+                if (is_dir($base)) {
+                    $dir = new \RecursiveDirectoryIterator($base, \FilesystemIterator::SKIP_DOTS);
+                    $iterator = new \RecursiveIteratorIterator($dir, \RecursiveIteratorIterator::SELF_FIRST);
+                    foreach ($iterator as $file) {
+                        if ($limitDirectories) {
+                            if ($file->isDir() && in_array($file->getFilename(), $limitDirectories)) {
+                                $nestedIterator = new \RecursiveDirectoryIterator($file);
+                                foreach ($nestedIterator as $nestedFile) {
+                                    if ($nestedFile->isFile() && $nestedFile->getFilename() === $fileName) {
+                                        return $nestedFile->getPathname();
+                                    }
+                                }
+                            }
+                        } else {
+                            if ($file->isFile() && $file->getFilename() === $fileName) {
+                                return $file->getPathname();
+                            }
+                        }
+                    }
+                }
+                if (is_file($base . DIRECTORY_SEPARATOR . $fileName)) {
+                    return $base . DIRECTORY_SEPARATOR . $fileName;
+                }
             }
         }
-        throw new \Exception("File not found: $fileName");
+        throw new \Exception('File not found: ' . $fileName);
     }
 
     /**
@@ -51,6 +82,7 @@ class Finder
             $file = self::findFile($fileName . ".component.php", $directories);
             return $file;
         } catch (\Exception $e) {
+
             trigger_error("Component file not found: $fileName", E_USER_WARNING);
             return "";
         }

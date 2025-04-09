@@ -268,14 +268,22 @@ class Router
     /**
      * Redirect to a specific URL
      * 
-     * @param string $url
-     * @param bool $replace
-     * @param int $response_code
+     * @param string $url url to redirect to
+     * @param int $response_code HTTP response code (default: 301)
+     * @param bool $internal_only if true, only redirect if the URL is internal (same domain)
      * @return never
      */
-    public static function redirect(string $url, int $status = 0, int $response_code = 301): void
+    public static function redirect(string $url, int $response_code = 301, bool $internal_only = false): void
     {
-        header(header: "Location: $url", replace: $status, response_code: $response_code);
+        if ($internal_only) {
+            if (!self::isInternal($url)) {
+                return;
+            }
+        }
+        if (!self::validateUrl($url)) {
+            return;
+        }
+        header(header: "Location: $url", replace: true, response_code: $response_code);
         exit;
     }
 
@@ -286,6 +294,40 @@ class Router
     {
         $routes = self::autoDiscoverRoutes();
         return $routes;
+    }
+
+    /**
+     * Checks if a URL is valid
+     * 
+     * @param string $url
+     * @return bool
+     */
+    public static function validateUrl(string $url, array $allowed_schemes = ['http', 'https']): bool
+    {
+
+        // check if url is relative (starts with / or ../ or ./)
+        if (preg_match('#^(\/|\.\.?\/)#', $url)) {
+            return true;
+        }
+
+        // Check if the URL is valid
+        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+            return false;
+        }
+        $parts = parse_url($url);
+        return isset($parts['scheme']) && in_array(strtolower($parts['scheme']), $allowed_schemes);
+    }
+
+    /**
+     * Checks if a URL is from the same domain
+     * @param string $url
+     * @return bool
+     */
+    public static function isInternal(string $url): bool
+    {
+        if (!preg_match('#^(https?:|//)#', $url)) return true;
+        $host = parse_url($url, PHP_URL_HOST);
+        return $host === $_SERVER['HTTP_HOST'];
     }
 }
 
