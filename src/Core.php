@@ -21,7 +21,7 @@ class Core {
     private function ini() {
         session_start();
         define("DIRECTORY", getcwd());
-        require_once __DIR__ . '/Helpers.php';
+        require_once __DIR__ . '/Helpers/Helpers.php';
         Env::load();
     }
 }
