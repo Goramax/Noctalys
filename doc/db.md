@@ -6,13 +6,13 @@ Noctalys provides a simple way to connect to a database using the `Db` class. Th
 
 To connect to a database, you need to configure the database connection settings in the `.env` file. The following settings are required:
 
-```env
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=secret
-DB_NAME=my_database
+```js
+DB_HOST="localhost"
+DB_USER="root"
+DB_PASSWORD="secret"
+DB_NAME="my_database"
 DB_PORT=3306
-DB_DRIVER=mysql
+DB_DRIVER="mysql"
 ```
 You can also set the `DB_DRIVER` to `mysql`, `pgsql`, `sqlsrv` or `sqlite` depending on the type of database you are using. The default is `mysql`.
 
