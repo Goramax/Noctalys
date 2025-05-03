@@ -55,13 +55,14 @@ class Finder
     /**
      * Find a layout file by name
      * @param string $layoutName layout name
+     * @param string $extension file extension
      * @return string path to the layout file
      */
-    public static function findLayout($fileName): string
+    public static function findLayout($fileName, $extension = 'php'): string
     {
         try {
             $directories = Config::get("layouts");
-            return self::findFile($fileName . ".layout.php", $directories);
+            return self::findFile($fileName . ".layout." . $extension, $directories);
         } catch (\Exception $e) {
             throw new \Exception("Layout file not found: $fileName");
         }
@@ -70,13 +71,14 @@ class Finder
     /**
      * Find a component file by name
      * @param string $componentName component name
+     * @param string $extension file extension
      * @return string path to the component file
      */
-    public static function findComponent($fileName): string
+    public static function findComponent($fileName, $extension = 'php'): string
     {
         try {
             $directories = Config::get("components");
-            $file = self::findFile($fileName . ".component.php", $directories);
+            $file = self::findFile($fileName . ".component." . $extension, $directories);
             return $file;
         } catch (\Exception $e) {
 

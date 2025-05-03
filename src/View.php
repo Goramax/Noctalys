@@ -3,30 +3,37 @@
 namespace Goramax\NoctalysFramework;
 
 use Goramax\NoctalysFramework\Router;
-use Goramax\NoctalysFramework\Finder;
-use Goramax\NoctalysFramework\Hooks;
+use Goramax\NoctalysFramework\TemplateEngines\TemplateEngineInterface;
 
 class View
 {
     private static bool $rendered = false;
 
-    public static function render(string $view, array $data = [], string $layout = 'default'): void
+    public static function render(string $view, array $data = [], string $layout = 'default', string $forceEngine = ''): void
     {
         if (self::$rendered) return;
-        $viewFile = Router::getCurrentFolder() . "/$view.view.php";
-        extract($data);
+        if ($forceEngine) {
+            $engine = $forceEngine;
+        } else {
+            try {
+                $engine = Config::get('template_engine');
+                $engine = $engine['engine'];
+            } catch (\Exception $e) {
+                $engine = 'no';
+            }
+        }
+        $engineClass = "Goramax\\NoctalysFramework\\TemplateEngines\\" . ucfirst($engine) . "Engine";
+        if (!class_exists($engineClass)) {
+            throw new \Exception("Template engine $engineClass not found");
+        }
+        if (!is_subclass_of($engineClass, TemplateEngineInterface::class)) {
+            throw new \Exception("Template engine $engineClass must implement TemplateEngineInterface");
+        }
+        $engineInstance = new $engineClass(Router::getCurrentFolder(), Config::get('template_engine')['options'] ?? []);
 
-        Hooks::run("before_view", $view, $viewFile, $layout, $data);
-        $layoutFile = Finder::findLayout($layout);
 
-        ob_start();
-        echo "<div data-view=\"$view\">";
-        require $viewFile;
-        echo "</div>";
-        $_view = ob_get_clean();
-        require $layoutFile;
+        $engineInstance->process($view, $data, $layout);  
 
         self::$rendered = true;
-        Hooks::run("after_view", $view, $viewFile, $layout, $data);
     }
 }

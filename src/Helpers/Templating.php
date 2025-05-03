@@ -12,9 +12,20 @@ use Goramax\NoctalysFramework\ErrorHandler;
  * @param array $data data to pass to the component as variables
  * @return void
  */
-function render_component(string $component, array $data = []): void
+function render_component(string $component, array $data = [], string $extension = 'php'): void
 {
-    Component::load($component, $data);
+    if (empty($component)) {
+        ErrorHandler::warning("Component name is empty", depth: 3);
+        return;
+    }
+    if (empty($data)) {
+        $data = [];
+    }
+    if (!is_array($data)) {
+        ErrorHandler::warning("Data must be an array", depth: 3);
+        return;
+    }
+    Component::load($component, $data, $extension);
 }
 
 /**

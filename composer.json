@@ -15,6 +15,12 @@
         }
     ],
     "require": {
-        "php": ">=8.2"
+        "php": ">=8.2",
+        "twig/twig": "^3.20"
+    },
+    "suggest": {
+        "twig/twig": "Required to use Twig templates",
+        "smarty/smarty": "Required to use Smarty templates",
+        "latte/latte": "Required to use Latte templates"
     }
 }
