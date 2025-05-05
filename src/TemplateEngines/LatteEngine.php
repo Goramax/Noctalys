@@ -6,6 +6,7 @@ use Goramax\NoctalysFramework\TemplateEngines\TemplateEngineInterface;
 use Goramax\NoctalysFramework\Router;
 use Goramax\NoctalysFramework\Finder;
 use Goramax\NoctalysFramework\Hooks;
+use Goramax\NoctalysFramework\ErrorHandler;
 use Latte\Engine;
 
 class LatteEngine implements TemplateEngineInterface
@@ -17,10 +18,64 @@ class LatteEngine implements TemplateEngineInterface
     public function __construct(string $currentFolder, array $options = [])
     {
         $this->currentFolder = $currentFolder;
-        $this->options = $options;
+        
+        // Default options
+        $defaultOptions = [
+            'temp_dir' => DIRECTORY . '/cache/latte',
+            'auto_refresh' => true,
+            'strict_types' => false,
+            'strict_parameters' => false,
+            'content_type' => 'html',
+            'debug' => Env::get('APP_ENV') === 'dev',
+            'extension_methods' => [],
+            'provider_callbacks' => [],
+            'filters' => []
+        ];
+        
+        // Merge provided options with defaults
+        $this->options = array_merge($defaultOptions, $options);
+        
+        if (!class_exists('Latte\Engine')) {
+            ErrorHandler::fatal(
+                "Latte is not installed. Please install it using Composer: \n" .
+                "composer require latte/latte"
+            );
+        }
         
         $this->latte = new Engine();
-        $this->latte->setTempDirectory($this->options['temp_dir'] ?? DIRECTORY . '/cache/latte');
+        
+        // Configure Latte with our options
+        $this->latte->setTempDirectory($this->options['temp_dir']);
+        $this->latte->setAutoRefresh($this->options['auto_refresh']);
+        $this->latte->setStrictTypes($this->options['strict_types']);
+        $this->latte->setStrictParsing($this->options['strict_parameters']);
+        $this->latte->setContentType($this->options['content_type']);
+        
+        // Apply debug mode
+        if ($this->options['debug']) {
+            $this->latte->addExtension(new \Latte\Bridges\Tracy\TracyExtension);
+        }
+        
+        // Register custom extension methods
+        if (!empty($this->options['extension_methods'])) {
+            foreach ($this->options['extension_methods'] as $name => $callback) {
+                $this->latte->addExtension($callback);
+            }
+        }
+        
+        // Register provider callbacks
+        if (!empty($this->options['provider_callbacks'])) {
+            foreach ($this->options['provider_callbacks'] as $name => $callback) {
+                $this->latte->addProvider($name, $callback);
+            }
+        }
+        
+        // Register filters
+        if (!empty($this->options['filters'])) {
+            foreach ($this->options['filters'] as $name => $callback) {
+                $this->latte->addFilter($name, $callback);
+            }
+        }
         
         global $latte;
         $latte = $this->latte;
@@ -67,11 +122,11 @@ class LatteEngine implements TemplateEngineInterface
         $layoutFile = Finder::findLayout($layout, 'latte');
 
         if (!file_exists($viewFile)) {
-            throw new \Exception("View file not found: $viewFile");
+            ErrorHandler::fatal("View file not found: $viewFile");
         }
 
         if (!$layoutFile) {
-            throw new \Exception("Layout not found: $layout");
+            ErrorHandler::fatal("Layout not found: $layout");
         }
         
         // Render view with data-view attribute

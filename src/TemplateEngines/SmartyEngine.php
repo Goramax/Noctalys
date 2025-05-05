@@ -3,10 +3,11 @@
 namespace Goramax\NoctalysFramework\TemplateEngines;
 
 use Goramax\NoctalysFramework\TemplateEngines\TemplateEngineInterface;
-use Goramax\NoctalysFramework\Router;
 use Goramax\NoctalysFramework\Finder;
 use Goramax\NoctalysFramework\Hooks;
-use Smarty;
+use Goramax\NoctalysFramework\Env;
+use Goramax\NoctalysFramework\ErrorHandler;
+use Smarty\Smarty;
 
 class SmartyEngine implements TemplateEngineInterface
 {
@@ -17,13 +18,117 @@ class SmartyEngine implements TemplateEngineInterface
     public function __construct(string $currentFolder, array $options = [])
     {
         $this->currentFolder = $currentFolder;
-        $this->options = $options;
+        
+        // Default options
+        $defaultOptions = [
+            'template_dir' => DIRECTORY . '/src/Frontend/pages',
+            'compile_dir' => DIRECTORY . '/cache/smarty/templates_c',
+            'cache_dir' => DIRECTORY . '/cache/smarty/cache',
+            'config_dir' => DIRECTORY . '/cache/smarty/configs',
+            'caching' => false,
+            'cache_lifetime' => 120,
+            'debug' => Env::get('APP_ENV') === 'dev',
+            'left_delimiter' => '{',
+            'right_delimiter' => '}',
+            'escape_html' => true,
+            'force_compile' => Env::get('APP_ENV') === 'dev',
+            'auto_literal' => true
+        ];
+        
+        // Merge provided options with defaults
+        $this->options = array_merge($defaultOptions, $options);
+        
+        if (!class_exists('Smarty\Smarty')) {
+            ErrorHandler::fatal(
+                "Smarty is not installed. Please install it using Composer: \n" .
+                "composer require smarty/smarty"
+            );
+        }
         
         $this->smarty = new Smarty();
-        $this->smarty->setTemplateDir($this->options['template_dir'] ?? DIRECTORY . '/src/Frontend/pages');
-        $this->smarty->setCompileDir($this->options['compile_dir'] ?? DIRECTORY . '/cache/smarty/templates_c');
-        $this->smarty->setCacheDir($this->options['cache_dir'] ?? DIRECTORY . '/cache/smarty/cache');
-        $this->smarty->setConfigDir($this->options['config_dir'] ?? DIRECTORY . '/cache/smarty/configs');
+        
+        // Apply all options to Smarty instance
+        $this->smarty->setTemplateDir($this->options['template_dir']);
+        $this->smarty->setCompileDir($this->options['compile_dir']);
+        $this->smarty->setCacheDir($this->options['cache_dir']);
+        $this->smarty->setConfigDir($this->options['config_dir']);
+        $this->smarty->setCaching($this->options['caching']);
+        $this->smarty->setCacheLifetime($this->options['cache_lifetime']);
+        $this->smarty->setDebugging($this->options['debug']);
+        $this->smarty->setLeftDelimiter($this->options['left_delimiter']);
+        $this->smarty->setRightDelimiter($this->options['right_delimiter']);
+        $this->smarty->setEscapeHtml($this->options['escape_html']);
+        $this->smarty->setForceCompile($this->options['force_compile']);
+        $this->smarty->setAutoLiteral($this->options['auto_literal']);
+        
+        // Make Smarty instance globally accessible
+        global $smarty;
+        $smarty = $this->smarty;
+        
+        // Automatically register all helpers
+        $this->registerHelpers();
+    }
+    
+    /**
+     * Automatically registers all helpers in the Smarty environment
+     */
+    private function registerHelpers(): void
+    {
+        // Get all user-defined functions
+        $definedFunctions = get_defined_functions();
+        $userFunctions = $definedFunctions['user'];
+        
+        // Functions to exclude or process specially
+        $excludedFunctions = ['dump', 'dd', 'var_dump'];
+        
+        foreach ($userFunctions as $function) {
+            // Ignore excluded functions
+            if (in_array($function, $excludedFunctions)) {
+                continue;
+            }
+            
+            // Special handling for render_component
+            if ($function === 'render_component') {
+                $this->smarty->registerPlugin('function', 'render_component', function ($params, $smarty) {
+                    $component = $params['component'] ?? null;
+                    unset($params['component']);
+                    // Add 'smarty' as the extension argument
+                    return render_component($component, $params, 'tpl');
+                });
+            } 
+            else {
+                $this->smarty->registerPlugin('function', $function, function($params, $smarty) use ($function) {
+                    // Try to intelligently extract arguments based on reflection
+                    try {
+                        $reflection = new \ReflectionFunction($function);
+                        $args = [];
+                        
+                        foreach ($reflection->getParameters() as $param) {
+                            $paramName = $param->getName();
+                            if (isset($params[$paramName])) {
+                                $args[] = $params[$paramName];
+                                unset($params[$paramName]);
+                            } else if ($param->isOptional()) {
+                                $args[] = $param->getDefaultValue();
+                            } else {
+                                // Required parameter not provided
+                                return "Error: Missing required parameter '$paramName' for function '$function'";
+                            }
+                        }
+                        
+                        // Add remaining params as the last argument if the function accepts variable args
+                        if (!empty($params) && $reflection->isVariadic()) {
+                            $args[] = $params;
+                        }
+                        
+                        return call_user_func_array($function, $args);
+                    } catch (\Exception $e) {
+                        // Fallback to direct function call if reflection fails
+                        return call_user_func($function, $params);
+                    }
+                });
+            }
+        }
     }
 
     public function process(string $view, array $data = [], string $layout = 'default'): void
@@ -34,11 +139,11 @@ class SmartyEngine implements TemplateEngineInterface
         $layoutFile = Finder::findLayout($layout, 'tpl');
 
         if (!file_exists($viewFile)) {
-            throw new \Exception("View file not found: $viewFile");
+            ErrorHandler::fatal("View file not found: $viewFile");
         }
 
         if (!$layoutFile) {
-            throw new \Exception("Layout not found: $layout");
+            ErrorHandler::fatal("Layout not found: $layout");
         }
 
         // Assign data to Smarty
@@ -54,7 +159,7 @@ class SmartyEngine implements TemplateEngineInterface
         $_view = ob_get_clean();
         
         // Assign the rendered view to be used in the layout
-        $this->smarty->assign('_view', $_view);
+        $this->smarty->assign('_view', $__view);
         
         // Render layout with view embedded
         echo $this->smarty->fetch($layoutFile);

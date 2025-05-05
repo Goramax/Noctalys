@@ -32,7 +32,7 @@ class Component
                 $rendered = self::renderTwigComponent($component, $data);
                 break;
                 
-            case 'smarty':
+            case 'tpl':
                 $rendered = self::renderSmartyComponent($component, $data);
                 break;
                 
@@ -88,12 +88,16 @@ class Component
     private static function renderSmartyComponent(string $component, array $data): bool
     {
         global $smarty;
-        if (isset($smarty) && $smarty instanceof \Smarty) {
+        if (isset($smarty) && $smarty instanceof \Smarty\Smarty) {
             try {
                 foreach ($data as $key => $value) {
                     $smarty->assign($key, $value);
                 }
                 echo $smarty->fetch($component);
+
+                foreach (array_keys($data) as $key) {
+                    $smarty->clearAssign($key);
+                }
                 return true;
             } catch (\Exception $e) {
                 ErrorHandler::warning("Error rendering Smarty component: " . $e->getMessage(), depth: 3);

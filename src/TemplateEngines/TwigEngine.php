@@ -7,6 +7,7 @@ use Goramax\NoctalysFramework\Router;
 use Goramax\NoctalysFramework\Finder;
 use Goramax\NoctalysFramework\Hooks;
 use Goramax\NoctalysFramework\Env;
+use Goramax\NoctalysFramework\ErrorHandler;
 use \Twig\Environment;
 use \Twig\Loader\FilesystemLoader;
 use \Twig\TwigFunction;
@@ -22,8 +23,16 @@ class TwigEngine implements TemplateEngineInterface
         $this->currentFolder = $currentFolder;
         // Ensure the directory exists before creating the loader
         if (!is_dir($currentFolder)) {
-            throw new \RuntimeException("Directory not found: $currentFolder");
+            ErrorHandler::fatal("Directory not found: $currentFolder");
         }
+        
+        if (!class_exists('Twig\Environment')) {
+            ErrorHandler::fatal(
+                "Twig is not installed. Please install it using Composer: \n" .
+                "composer require 'twig/twig:^3.0'"
+            );
+        }
+        
         $this->loader = new FilesystemLoader($currentFolder);
         
         // Define default options
@@ -33,7 +42,7 @@ class TwigEngine implements TemplateEngineInterface
             'autoescape' => false,
             'strict_variables' => false,
             'optimizations' => 0,
-            'auto_reload' => true,
+            'auto_reload' => false,
             'charset' => 'UTF-8'
         ];
         
@@ -88,7 +97,11 @@ class TwigEngine implements TemplateEngineInterface
         Hooks::run("before_view", $view, "$view.view.twig", $layout, $data);
         
         // Render the view
-        $viewContent = $this->twig->render("$view.view.twig", $data);
+        try {
+            $viewContent = $this->twig->render("$view.view.twig", $data);
+        } catch (\Exception $e) {
+            ErrorHandler::fatal("Error rendering view '$view': " . $e->getMessage());
+        }
         
         // Wrap view content with data-view attribute
         $viewContent = "<div data-view=\"$view\">{$viewContent}</div>";
@@ -96,7 +109,7 @@ class TwigEngine implements TemplateEngineInterface
         // Find and render the layout
         $layoutFile = Finder::findLayout($layout, 'twig');
         if (!$layoutFile) {
-            throw new \RuntimeException("Layout file not found: $layout");
+            ErrorHandler::fatal("Layout file not found: $layout");
         }
         
         // If it's a Twig layout
