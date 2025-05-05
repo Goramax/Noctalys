@@ -30,7 +30,7 @@ class SmartyEngine implements TemplateEngineInterface
             'debug' => Env::get('APP_ENV') === 'dev',
             'left_delimiter' => '{',
             'right_delimiter' => '}',
-            'escape_html' => true,
+            'escape_html' => false,
             'force_compile' => Env::get('APP_ENV') === 'dev',
             'auto_literal' => true
         ];
@@ -159,7 +159,7 @@ class SmartyEngine implements TemplateEngineInterface
         $_view = ob_get_clean();
         
         // Assign the rendered view to be used in the layout
-        $this->smarty->assign('_view', $__view);
+        $this->smarty->assign('_view', $_view);
         
         // Render layout with view embedded
         echo $this->smarty->fetch($layoutFile);

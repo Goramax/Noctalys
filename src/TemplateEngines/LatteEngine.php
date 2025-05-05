@@ -3,10 +3,10 @@
 namespace Goramax\NoctalysFramework\TemplateEngines;
 
 use Goramax\NoctalysFramework\TemplateEngines\TemplateEngineInterface;
-use Goramax\NoctalysFramework\Router;
 use Goramax\NoctalysFramework\Finder;
 use Goramax\NoctalysFramework\Hooks;
 use Goramax\NoctalysFramework\ErrorHandler;
+use Goramax\NoctalysFramework\Env;
 use Latte\Engine;
 
 class LatteEngine implements TemplateEngineInterface
