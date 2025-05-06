@@ -94,7 +94,19 @@ class TwigEngine implements TemplateEngineInterface
 
     public function process(string $view, array $data = [], string $layout = 'default'): void
     {
-        Hooks::run("before_view", $view, "$view.view.twig", $layout, $data);
+        $viewFile = "$view.view.twig";
+        $layoutFile = Finder::findLayout($layout, 'twig');
+        if (!$layoutFile) {
+            ErrorHandler::fatal("Layout file not found: $layout");
+        }
+        
+        // Run before layout hooks
+        Hooks::run("before_layout", $layout, $viewFile, $layoutFile, $data);
+        Hooks::run("before_layout_" . $layout, $viewFile, $layoutFile, $data);
+        
+        // Run before view hooks
+        Hooks::run("before_view", $view, $viewFile, $layout, $data);
+        Hooks::run("before_view_" . $view, $viewFile, $layout, $data);
         
         // Render the view
         try {
@@ -106,11 +118,9 @@ class TwigEngine implements TemplateEngineInterface
         // Wrap view content with data-view attribute
         $viewContent = "<div data-view=\"$view\">{$viewContent}</div>";
         
-        // Find and render the layout
-        $layoutFile = Finder::findLayout($layout, 'twig');
-        if (!$layoutFile) {
-            ErrorHandler::fatal("Layout file not found: $layout");
-        }
+        // Run after view hooks
+        Hooks::run("after_view", $view, $viewFile, $layout, $data);
+        Hooks::run("after_view_" . $view, $viewFile, $layout, $data);
         
         // If it's a Twig layout
         if (preg_match('/\.twig$/', $layoutFile)) {
@@ -137,6 +147,8 @@ class TwigEngine implements TemplateEngineInterface
             require $layoutFile;
         }
         
-        Hooks::run("after_view", $view, "$view.twig", $layout, $data);
+        // Run after layout hooks
+        Hooks::run("after_layout", $layout, $viewFile, $layoutFile, $data);
+        Hooks::run("after_layout_" . $layout, $viewFile, $layoutFile, $data);
     }
 }

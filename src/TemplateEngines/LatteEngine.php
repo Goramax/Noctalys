@@ -118,7 +118,6 @@ class LatteEngine implements TemplateEngineInterface
     {
         extract($data, EXTR_SKIP);
         $viewFile = $this->currentFolder . "/$view.view.latte";
-        Hooks::run("before_view", $view, $viewFile, $layout, $data);
         $layoutFile = Finder::findLayout($layout, 'latte');
 
         if (!file_exists($viewFile)) {
@@ -129,6 +128,14 @@ class LatteEngine implements TemplateEngineInterface
             ErrorHandler::fatal("Layout not found: $layout");
         }
         
+        // Run before layout hooks
+        Hooks::run("before_layout", $layout, $viewFile, $layoutFile, $data);
+        Hooks::run("before_layout_" . $layout, $viewFile, $layoutFile, $data);
+        
+        // Run before view hooks
+        Hooks::run("before_view", $view, $viewFile, $layout, $data);
+        Hooks::run("before_view_" . $view, $viewFile, $layout, $data);
+        
         // Render view with data-view attribute
         ob_start();
         echo "<div data-view=\"$view\">";
@@ -136,12 +143,18 @@ class LatteEngine implements TemplateEngineInterface
         echo "</div>";
         $_view = ob_get_clean();
         
+        // Run after view hooks
+        Hooks::run("after_view", $view, $viewFile, $layout, $data);
+        Hooks::run("after_view_" . $view, $viewFile, $layout, $data);
+        
         // Add rendered view to data for layout as html
         $data['_view'] = new \Latte\Runtime\Html($_view);
         
         // Render layout with view embedded
         $this->latte->render($layoutFile, $data);
         
-        Hooks::run("after_view", $view, $viewFile, $layout, $data);
+        // Run after layout hooks
+        Hooks::run("after_layout", $layout, $viewFile, $layoutFile, $data);
+        Hooks::run("after_layout_" . $layout, $viewFile, $layoutFile, $data);
     }
 }

@@ -19,6 +19,7 @@ class Component
     public static function load($componentName, $data = [], $extension = 'php'): void
     {
         Hooks::run("before_component", $componentName, $data);
+        Hooks::run("before_component_" . $componentName, $data);
 
         $component = Finder::findComponent($componentName, $extension);
         if ($component === "") {
@@ -47,6 +48,7 @@ class Component
         
         if ($rendered) {
             Hooks::run("after_component", $componentName, $data);
+            Hooks::run("after_component_" . $componentName, $data);
         }
     }
     

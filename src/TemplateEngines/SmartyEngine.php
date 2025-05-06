@@ -135,7 +135,6 @@ class SmartyEngine implements TemplateEngineInterface
     {
         extract($data, EXTR_SKIP);
         $viewFile = $this->currentFolder . "/$view.view.tpl";
-        Hooks::run("before_view", $view, $viewFile, $layout, $data);
         $layoutFile = Finder::findLayout($layout, 'tpl');
 
         if (!file_exists($viewFile)) {
@@ -145,6 +144,14 @@ class SmartyEngine implements TemplateEngineInterface
         if (!$layoutFile) {
             ErrorHandler::fatal("Layout not found: $layout");
         }
+        
+        // Run before layout hooks
+        Hooks::run("before_layout", $layout, $viewFile, $layoutFile, $data);
+        Hooks::run("before_layout_" . $layout, $viewFile, $layoutFile, $data);
+
+        // Run before view hooks
+        Hooks::run("before_view", $view, $viewFile, $layout, $data);
+        Hooks::run("before_view_" . $view, $viewFile, $layout, $data);
 
         // Assign data to Smarty
         foreach ($data as $key => $value) {
@@ -158,12 +165,18 @@ class SmartyEngine implements TemplateEngineInterface
         echo "</div>";
         $_view = ob_get_clean();
         
+        // Run after view hooks
+        Hooks::run("after_view", $view, $viewFile, $layout, $data);
+        Hooks::run("after_view_" . $view, $viewFile, $layout, $data);
+        
         // Assign the rendered view to be used in the layout
         $this->smarty->assign('_view', $_view);
         
         // Render layout with view embedded
         echo $this->smarty->fetch($layoutFile);
         
-        Hooks::run("after_view", $view, $viewFile, $layout, $data);
+        // Run after layout hooks
+        Hooks::run("after_layout", $layout, $viewFile, $layoutFile, $data);
+        Hooks::run("after_layout_" . $layout, $viewFile, $layoutFile, $data);
     }
 }

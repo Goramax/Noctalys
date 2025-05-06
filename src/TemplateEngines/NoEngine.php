@@ -12,15 +12,22 @@ class NoEngine implements TemplateEngineInterface
     {
         extract($data, EXTR_SKIP);
         $viewFile = Router::getCurrentFolder() . "/$view.view.php";
-        Hooks::run("before_view", $view, $viewFile, $layout, $data);
         $layoutFile = Finder::findLayout($layout, 'php');
 
+        Hooks::run("before_layout", $layout, $viewFile, $layoutFile, $data);
+        Hooks::run("before_layout_" . $layout, $viewFile, $layoutFile, $data);
+
         ob_start();
+        Hooks::run("before_view", $view, $viewFile, $layout, $data);
+        Hooks::run("before_view_" . $view, $viewFile, $layout, $data);
         echo "<div data-view=\"$view\">";
         require $viewFile;
         echo "</div>";
         $_view = ob_get_clean();
-        require $layoutFile;
         Hooks::run("after_view", $view, $viewFile, $layout, $data);
+        Hooks::run("after_view_" . $view, $viewFile, $layout, $data);
+        require $layoutFile;
+        Hooks::run("after_layout", $layout, $viewFile, $layoutFile, $data);
+        Hooks::run("after_layout_" . $layout, $viewFile, $layoutFile, $data);
     }
 }

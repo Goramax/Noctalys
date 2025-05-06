@@ -5,6 +5,7 @@ namespace Goramax\NoctalysFramework;
 class Hooks
 {
     private static array $hooks = [];
+    private static bool $initialized = false;
 
     /**
      * Add a hook
@@ -29,6 +30,16 @@ class Hooks
 
         foreach (self::$hooks[$hookName] as $callback) {
             call_user_func_array($callback, $params);
+        }
+    }
+    
+    public static function setup(): void
+    {
+        if (self::$initialized) return;
+        $hooksFile = DIRECTORY . '/hooks.php';
+        if (file_exists($hooksFile)) {
+            include_once $hooksFile;
+            self::$initialized = true;
         }
     }
 }
