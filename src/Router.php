@@ -4,7 +4,6 @@ namespace Goramax\NoctalysFramework;
 
 use Error;
 use Goramax\NoctalysFramework\Config;
-use Noctalys\NoctalysApp\Frontend\Pages\Error\ErrorController;
 use Goramax\NoctalysFramework\Hooks;
 
 class Router
@@ -15,6 +14,7 @@ class Router
     private static $errorPage;
     private static $params;
     private static $currentPath;
+    public static $current_route;
 
     /**
      * Initialize static properties
@@ -37,7 +37,7 @@ class Router
      */
     private static function autoDiscoverRoutes()
     {
-        return "NOT IMPLEMENTED YET";
+        ErrorHandler::warning("Auto-discovery of routes is not implemented yet.");
         // Implementation would need to iterate through all directories in self::$pageDirs
     }
 
@@ -60,6 +60,9 @@ class Router
      */
     private static function getCurrentRoute(): string
     {
+        if (self::$current_route) {
+            return self::$current_route;
+        }
         $uri = $_SERVER['REQUEST_URI'];
         // Remove query parameters
         $uri = strtok($uri, '?');
@@ -134,12 +137,9 @@ class Router
     {
         $folder_name = basename($folder_path);
         $param_folder = $folder_path . '/' . $folder_name . '_param';
-        //echo($param_folder);
         if (is_dir($param_folder)) {
-            //echo " true <br>";
             return true;
         }
-        //echo " false <br>";
         return false;
     }
 
@@ -200,19 +200,21 @@ class Router
      * @param string $code
      * @return void
      */
-    public static function error(string $code): void
+    public static function error(int $code = 500, $message = ''): void
     {
         $controllerFile = self::findControllerFile(self::$errorPage);
         if (!$controllerFile) {
-            throw new Error("Controller file not found at " . self::$errorPage);
+            ErrorHandler::fatal("Controller file not found at " . self::$errorPage);
         }
         self::$currentPath = $controllerFile;
         require_once $controllerFile;
         $controllerClass = self::findControllerClass($controllerFile);
         if ($controllerClass) {
             http_response_code($code);
-            $controller = new $controllerClass;
-            $controller->main();
+            $controller = new $controllerClass();
+            $controller->main($code, $message);
+            $currentRoute = self::getCurrentRoute();
+            Hooks::run("after_error", $code, $message, $currentRoute);
         }
     }
 
@@ -226,8 +228,8 @@ class Router
         $controllerFile = null;
         $current_route_array = explode('/', $current_route);
         $paramRoute = [];
-        Hooks::run("before_dispatch", $current_route);
 
+        Hooks::run("before_dispatch", $current_route);
         // Try to find the controller file in any of the page directories
         foreach (self::$pageDirs as $page_dir) {
             $potential_controller = self::findControllerFile($page_dir . $current_route);
@@ -242,19 +244,16 @@ class Router
             if ($paramRoute !== null) {
                 $controllerFolder = $paramRoute;
                 $params =  self::getParams();
-                //var_dump($params);
                 $controllerFile = self::findControllerFile($controllerFolder);
             }
         }
         // If there is no controller file or the page corresponds to the error page (404)
         if ($controllerFile === null || $page_dir . $current_route === self::$errorPage) {
-            // 404
             self::error("404");
             Hooks::run("after_dispatch", $current_route, $current_route_array);
             return;
         }
         self::$currentPath = $controllerFile;
-        //echo "folder" . self::$currentPath;
         require_once $controllerFile;
         $controllerClass = self::findControllerClass($controllerFile);
 

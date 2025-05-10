@@ -45,13 +45,28 @@ class Db{
      * Execute a SQL query and return the result set
      * @param string $sql The SQL query to execute
      * @param array $params The parameters to bind to the query
-     * @return array The result set as an associative array
+     * @return array | int | string | bool The result set as an associative array for SELECT queries,
+     *                                   the last insert ID for INSERT queries,
+     *                                   the number of affected rows for UPDATE/DELETE queries,
+     *                                   or false on failure
      */
-    public static function sql(string $sql, array $params = [])
+    public static function sql(string $sql, array $params = []): array | int | string | bool
     {
         self::connect();
         $stmt = self::$pdo->prepare($sql);
-        $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $success = $stmt->execute($params);
+        
+        if (!$success) {
+            return false;
+        }
+        
+        $queryType = strtoupper(trim(explode(' ', $sql)[0]));
+        
+        return match($queryType) {
+            'SELECT' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+            'INSERT' => self::$pdo->lastInsertId(),
+            'UPDATE', 'DELETE' => $stmt->rowCount(),
+            default => $success,
+        };
     }
 }

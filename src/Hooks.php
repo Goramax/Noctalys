@@ -36,7 +36,7 @@ class Hooks
     public static function setup(): void
     {
         if (self::$initialized) return;
-        $hooksFile = DIRECTORY . '/hooks.php';
+        $hooksFile = DIRECTORY . '/src/hooks.php';
         if (file_exists($hooksFile)) {
             include_once $hooksFile;
             self::$initialized = true;

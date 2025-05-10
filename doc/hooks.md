@@ -1,6 +1,7 @@
 # Hooks
 
 ## List of hooks
+### Frontend hooks
 - `before_dispatch`: Called before the route is dispatched.
 - `after_dispatch`: Called after the route is dispatched.
 - `before_layout`: Called before the layout is rendered, with parameters: `$layout`, `$viewFile`, `$layoutFile`, `$data`.
@@ -13,6 +14,15 @@
 - `after_view_{name}`: Called after a specific view is rendered, with parameters: `$viewFile`, `$layout`, `$data`.
 - `before_component`: Called before a component is rendered, with parameters: `$component`, `$data`.
 - `after_component`: Called after a component is rendered, with parameters: `$component`, `$data`.
+- `after_error`: Called after an error page is rendered, with parameters: `$code`, `$message`, `$currentRoute`
+
+### Backend hooks
+- `request_get` : Called before the GET request is processed, with parameters: `$url`, `$headers`
+- `request_post`: Called before the POST request is processed, with parameters: `$url`, `$data`, `$headers`
+- `request_put`: Called before the PUT request is processed, with parameters: `$url`, `$data`, `$headers`
+- `request_delete`: Called before the DELETE request is processed, with parameters: `$url`, `$headers`
+- `request_patch`: Called before the PATCH request is processed, with parameters: `$url`, `$data`, `$headers`
+- `request_all`  : Called before any request is processed, with parameters: `$url`, `$method`, `$data`, `$headers`
 
 ## Running a hook
 To run a hook, use the `run()` method from the `Hooks` class where you want the hook to be executed.   
