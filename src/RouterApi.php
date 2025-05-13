@@ -45,6 +45,7 @@ class RouterApi
         $requestMethod = $_SERVER['REQUEST_METHOD'];
         $requestPath = strtok($_SERVER['REQUEST_URI'], '?');
 
+        try{
         Hooks::run("before_api_dispatch", [$requestMethod, $requestPath]);
         if (empty($requestPath) || $requestPath === '/') {
             http_response_code(404);
@@ -58,7 +59,6 @@ class RouterApi
                 array_shift($matches);
                 $params = self::extractParams($route['path'], $matches);
                 $controller = new $route['controller']();
-                
                 
                 $requestData = [];
                 if (in_array($requestMethod, ['POST', 'PUT', 'PATCH'])) {
@@ -75,21 +75,29 @@ class RouterApi
                     
                     // Merge request data with params
                     if (is_array($params) && !empty($params)) {
-                        call_user_func([$controller, $route['action']], $requestData, $params);
+                        call_user_func([$controller, $route['action']], $params, $requestData);
                     } else {
                         call_user_func([$controller, $route['action']], $requestData);
                     }
                 } else {
-                    if (is_array($params)) {
-                        call_user_func_array([$controller, $route['action']], $params);
-                    } else {
-                        call_user_func([$controller, $route['action']], [$params]);
-                    }
+                    // For GET and DELETE requests, just pass the params
+                    call_user_func([$controller, $route['action']], $params);
                 }
                 
                 Hooks::run("after_api_dispatch", [$requestMethod, $requestPath]);
                 return;
             }
+        }
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            
+            if (Config::get('app')['debug'] ?? false) {
+                Response::error($e->getMessage(), 500);
+            } else {
+
+                Response::error('Internal Server Error', 500);
+            }
+            return;
         }
 
         http_response_code(404);

@@ -31,13 +31,13 @@ class ErrorHandler
      * @return never
      * @throws \ErrorException
      */
-    public static function fatal(string $message, string $errorType = "error", int $depth = 1): never
+    public static function fatal(string $message, string $errorType = "error", int $depth = 0): never
     {
-        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, $depth + 1);
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, $depth);
         $caller = $trace[$depth] ?? null;
 
         $file = $caller['file'] ?? 'unknown file';
-        $line = $caller['line'] ?? 'unknown line';
+        $line = $caller['line'] ?? null;
 
         $error = self::convertToErrorType($errorType);
 
