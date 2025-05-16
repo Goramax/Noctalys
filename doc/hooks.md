@@ -24,6 +24,10 @@
 - `request_patch`: Called before the PATCH request is processed, with parameters: `$url`, `$data`, `$headers`
 - `request_all`  : Called before any request is processed, with parameters: `$url`, `$method`, `$data`, `$headers`
 
+### Special hooks
+- `on_error`: Called when an error occurs, with parameters: `$code`, `$message`, `$currentRoute`
+- `on_warning`: Called when an exception occurs, with parameters: `$exception`, `$currentRoute`
+
 ## Running a hook
 To run a hook, use the `run()` method from the `Hooks` class where you want the hook to be executed.   
 For example:

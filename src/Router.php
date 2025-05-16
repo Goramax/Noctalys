@@ -230,36 +230,42 @@ class Router
         $paramRoute = [];
 
         Hooks::run("before_dispatch", $current_route);
-        // Try to find the controller file in any of the page directories
-        foreach (self::$pageDirs as $page_dir) {
-            $potential_controller = self::findControllerFile($page_dir . $current_route);
-            if ($potential_controller !== null) {
-                $controllerFile = $potential_controller;
-                break;
+        try {
+            // Try to find the controller file in any of the page directories
+            foreach (self::$pageDirs as $page_dir) {
+                $potential_controller = self::findControllerFile($page_dir . $current_route);
+                if ($potential_controller !== null) {
+                    $controllerFile = $potential_controller;
+                    break;
+                }
             }
-        }
-        if ($controllerFile === null) {
-            // scan for _param folders
-            $paramRoute = self::findParamControllerFile($current_route_array);
-            if ($paramRoute !== null) {
-                $controllerFolder = $paramRoute;
-                $params =  self::getParams();
-                $controllerFile = self::findControllerFile($controllerFolder);
+            if ($controllerFile === null) {
+                // scan for _param folders
+                $paramRoute = self::findParamControllerFile($current_route_array);
+                if ($paramRoute !== null) {
+                    $controllerFolder = $paramRoute;
+                    $params =  self::getParams();
+                    $controllerFile = self::findControllerFile($controllerFolder);
+                }
             }
-        }
-        // If there is no controller file or the page corresponds to the error page (404)
-        if ($controllerFile === null || $page_dir . $current_route === self::$errorPage) {
-            self::error("404");
-            Hooks::run("after_dispatch", $current_route, $current_route_array);
-            return;
-        }
-        self::$currentPath = $controllerFile;
-        require_once $controllerFile;
-        $controllerClass = self::findControllerClass($controllerFile);
+            // If there is no controller file or the page corresponds to the error page (404)
+            if ($controllerFile === null || $page_dir . $current_route === self::$errorPage) {
+                self::error("404");
+                Hooks::run("after_dispatch", $current_route, $current_route_array);
+                return;
+            }
+            self::$currentPath = $controllerFile;
+            require_once $controllerFile;
+            $controllerClass = self::findControllerClass($controllerFile);
 
-        if ($controllerClass) {
-            $controller = new $controllerClass();
-            $controller->main();
+            if ($controllerClass) {
+                $controller = new $controllerClass();
+                $controller->main();
+            }
+        } catch (Error $e) {
+            if (Config::get('app')['debug'] == false) {
+                self::error(500, $e->getMessage());
+            }
         }
         Hooks::run("after_dispatch", $current_route);
     }

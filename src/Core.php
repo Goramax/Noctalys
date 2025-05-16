@@ -18,6 +18,7 @@ class Core
         session_start();
         define("DIRECTORY", getcwd());
         require_once __DIR__ . '/Helpers/Helpers.php';
+        set_exception_handler([ErrorHandler::class, 'handleException']);
         Env::load();
         Hooks::setup();
     }

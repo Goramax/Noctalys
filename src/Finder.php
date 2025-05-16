@@ -64,7 +64,7 @@ class Finder
             $directories = Config::get("layouts");
             return self::findFile($fileName . ".layout." . $extension, $directories);
         } catch (\Exception $e) {
-            throw new \Exception("Layout file not found: $fileName");
+            ErrorHandler::fatal("Layout file not found: $fileName", "error", 3);
         }
     }
 
@@ -82,7 +82,7 @@ class Finder
             return $file;
         } catch (\Exception $e) {
 
-            trigger_error("Component file not found: $fileName", E_USER_WARNING);
+            ErrorHandler::warning("Component file not found: $fileName", "warn", 3);
             return "";
         }
     }

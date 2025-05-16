@@ -21,6 +21,10 @@ class ErrorHandler
 
         $error = self::convertToErrorType($errorType);
 
+        error_log("Warning : $message (called at $file:$line)", 0);
+
+        Hooks::run("on_warning", $message, $file, $line, $error);
+
         trigger_error("$message (called at $file:$line)", $error);
     }
 
@@ -40,6 +44,10 @@ class ErrorHandler
         $line = $caller['line'] ?? null;
 
         $error = self::convertToErrorType($errorType);
+
+        error_log("Fatal : $message (called at $file:$line)", 0);
+
+        Hooks::run("on_error", $message, $file, $line, $error);
 
         throw new \ErrorException("$message (called at $file:$line)", 0, $error, $file, $line);
     }
@@ -63,5 +71,24 @@ class ErrorHandler
             "all" => E_ALL,
             default => E_USER_WARNING,
         };
+    }
+
+    /**
+     * Global exception handler
+     * @param \Throwable $exception
+     * @return void
+     */
+    public static function handleException(\Throwable $exception): void
+    {
+        if ($exception instanceof \Error) {
+            self::fatal($exception->getMessage(), 'error');
+        }
+        elseif ($exception instanceof \Exception) {
+            if ($exception->getCode() === 1) {
+                self::warning($exception->getMessage(), 'warn');
+            } else {
+                self::fatal($exception->getMessage(), 'error');
+            }
+        }
     }
 }
