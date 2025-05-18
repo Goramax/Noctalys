@@ -57,7 +57,16 @@ class Config
         self::$configContent = [
             'app' => [
                 'name' => 'My Noctalys App',
-                'timezone' => 'auto'
+                'timezone' => 'auto',
+                'version' => '1.0.0',
+                'debug' => true
+            ],
+            'cache' => [
+                'enabled' => false,
+                'cache_folder' => 'cache/noctalys',
+                'router_cache' => true,
+                'api_router_cache' => true,
+                'finder_cache' => true
             ],
             'env' => [
                 'extended_compat' => false
@@ -66,28 +75,21 @@ class Config
                 'engine' => 'no'
             ],
             'router' => [
+                'enabled' => true,
                 'page_scan' => [
                     [
                         'folder_name' => 'pages',
                         'path' => 'src/Frontend'
                     ]
                 ],
-                'overrides' => [
-                    [
-                        '/foo' => '/bar'
-                    ]
-                ],
-                'error_page' => 'src/Frontend/pages/error',
-                'api' => [
-                    'controller_scan' => [
-                        [
-                            'folder_name' => 'controllers',
-                            'path' => 'src/Backend'
-                        ]
-                    ],
-                    'api_url' => '/api'
-                ]
+                'error_page' => 'src/Frontend/pages/error'
             ],
+            'api' => [
+                'enabled' => true,
+                'controllers_location' => 'src/Backend/Controllers',
+                'api_url' => '/api'
+            ],
+            'hooks_file' => 'src/hooks.php',
             'layouts' => [
                 'default' => 'default',
                 'sources' => [

@@ -45,13 +45,7 @@ class Validator
         
         if ($this->orMode) {
             $this->orResult = $this->orResult || $finalResult;
-            
-            // If this was the last validation in an OR chain and we've accumulated a true result, use it
-            if ($name === $this->orGroupName) {
-                $this->results[$name] = $this->orResult ? 1 : 0;
-                $this->orMode = false;
-                $this->orResult = false;
-            }
+            // Ne pas écrire dans $results ici, seulement à la fin du groupe OR
         } else {
             $this->results[$name] = $finalResult ? 1 : 0;
         }
@@ -74,7 +68,7 @@ class Validator
      * 
      * @param string $groupName Name to use for the validation result
      */
-    public function or(string $groupName = 'or_validation'): self
+    public function startOr(string $groupName = 'or_validation'): self
     {
         $this->orMode = true;
         $this->orResult = false;

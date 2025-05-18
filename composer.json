@@ -1,7 +1,7 @@
 {
     "name": "goramax/noctalys-framework",
     "description": "A Simple PHP Lightweight Framework",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "type": "library",
     "license": "MIT",
     "autoload": {
@@ -15,9 +15,7 @@
         }
     ],
     "require": {
-        "php": ">=8.2",
-        "twig/twig": "^3.20",
-        "smarty/smarty": "^5.5"
+        "php": ">=8.2"
     },
     "suggest": {
         "twig/twig": "Required to use Twig templates",

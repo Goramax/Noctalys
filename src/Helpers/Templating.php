@@ -31,12 +31,13 @@ function render_component(string $component, array $data = [], string $extension
 /**
  * Returns the path to the image
  * @param string $name image name with extension (example.jpg)
+ * @param array $limitDirectories directories to limit the search to
  * if there are subfolders, use the following format: folder1/folder2/example.jpg
  */
-function img(string $name): string
+function img(string $name, array $limitDirectories = ['images', 'imgs' ]): string
 {
     try {
-        $imgsrc = Finder::findFile($name, Config::get('assets'), nested: true, limitDirectories: ['images', 'imgs']);
+        $imgsrc = Finder::findFile($name, Config::get('assets'), nested: true, limitDirectories: $limitDirectories);
         if ($imgsrc === null) {
             return "";
         }

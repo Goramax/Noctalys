@@ -3,10 +3,33 @@
 namespace Goramax\NoctalysFramework;
 
 use Goramax\NoctalysFramework\Config;
+use Goramax\NoctalysFramework\Cache;
+use Goramax\NoctalysFramework\ErrorHandler;
 use RecursiveArrayIterator;
 
 class Finder
 {
+    /**
+     * Stores whether finder cache is enabled
+     * @var bool|null
+     */
+    private static ?bool $isCacheEnabled = null;
+    
+    /**
+     * Check if finder cache can be used
+     * 
+     * @return bool True if finder cache can be used
+     */
+    private static function canUseCache(): bool
+    {
+        // Check only once per process
+        if (self::$isCacheEnabled === null) {
+            $cacheConfig = Config::get('cache');
+            self::$isCacheEnabled = $cacheConfig['enabled'] === true && $cacheConfig['finder_cache'] === true;
+        }        
+        return self::$isCacheEnabled;
+    }
+
     /**
      * Find a file in the directories
      * 
@@ -14,15 +37,37 @@ class Finder
      * @param array $directories config directories
      * @param bool $nested if true, will search in nested directories
      * @param array $limitDirectories directories to limit nested search
-     * @return string path to the file
+     * @return string|null path to the file
      */
-    public static function findFile(string $fileName, array $directories, bool $nested = false, array $limitDirectories = []): string | null
+    public static function findFile(string $fileName, array $directories, bool $nested = false, array $limitDirectories = []): ?string
     {
+        // Generate a unique cache key for this file lookup
+        $cacheKey = $fileName . '_' . md5(serialize([
+            $nested,
+            $limitDirectories,
+            array_map(function($source) {
+                return $source['path'] . '_' . $source['folder_name'];
+            }, $directories['sources'])
+        ]));
+        
+        // Try to get from cache first if caching is enabled
+        if (self::canUseCache()) {
+            $cachedPath = Cache::get('finder', "file_$cacheKey");
+            if ($cachedPath !== null) {
+                return $cachedPath;
+            }
+        }
+        
+        // Perform the standard file search if not in cache
         foreach ($directories['sources'] as $directory) {
             $base = $directory['path'] . DIRECTORY_SEPARATOR . $directory['folder_name'];
             $file = $base . DIRECTORY_SEPARATOR . $fileName;
             if (!$nested) {
                 if (file_exists($file)) {
+                    // Cache the result for future lookups if caching is enabled
+                    if (self::canUseCache()) {
+                        Cache::set('finder', "file_$cacheKey", $file);
+                    }
                     return $file;
                 }
             }
@@ -36,13 +81,23 @@ class Finder
                                 $nestedIterator = new \RecursiveDirectoryIterator($file);
                                 foreach ($nestedIterator as $nestedFile) {
                                     if ($nestedFile->isFile() && $nestedFile->getFilename() === $fileName) {
-                                        return $nestedFile->getPathname();
+                                        $path = $nestedFile->getPathname();
+                                        // Cache the result if caching is enabled
+                                        if (self::canUseCache()) {
+                                            Cache::set('finder', "file_$cacheKey", $path);
+                                        }
+                                        return $path;
                                     }
                                 }
                             }
                         } else {
                             if ($file->isFile() && $file->getFilename() === $fileName) {
-                                return $file->getPathname();
+                                $path = $file->getPathname();
+                                // Cache the result if caching is enabled
+                                if (self::canUseCache()) {
+                                    Cache::set('finder', "file_$cacheKey", $path);
+                                }
+                                return $path;
                             }
                         }
                     }
@@ -60,9 +115,24 @@ class Finder
      */
     public static function findLayout($fileName, $extension = 'php'): string
     {
+        // Try to get from cache first if caching is enabled
+        if (self::canUseCache()) {
+            $cachedPath = Cache::get('finder', "layout_$fileName.$extension");
+            if ($cachedPath !== null) {
+                return $cachedPath;
+            }
+        }
+        
         try {
             $directories = Config::get("layouts");
-            return self::findFile($fileName . ".layout." . $extension, $directories);
+            $filePath = self::findFile($fileName . ".layout." . $extension, $directories);
+            
+            // Cache the result for future lookups if caching is enabled
+            if (self::canUseCache()) {
+                Cache::set('finder', "layout_$fileName.$extension", $filePath);
+            }
+            
+            return $filePath;
         } catch (\Exception $e) {
             ErrorHandler::fatal("Layout file not found: $fileName", "error", 3);
         }
@@ -76,12 +146,25 @@ class Finder
      */
     public static function findComponent($fileName, $extension = 'php'): string
     {
+        // Try to get from cache first if caching is enabled
+        if (self::canUseCache()) {
+            $cachedPath = Cache::get('finder', "component_$fileName.$extension");
+            if ($cachedPath !== null) {
+                return $cachedPath;
+            }
+        }
+        
         try {
             $directories = Config::get("components");
             $file = self::findFile($fileName . ".component." . $extension, $directories);
+            
+            // Cache the result for future lookups if caching is enabled
+            if (self::canUseCache()) {
+                Cache::set('finder', "component_$fileName.$extension", $file);
+            }
+            
             return $file;
         } catch (\Exception $e) {
-
             ErrorHandler::warning("Component file not found: $fileName", "warn", 3);
             return "";
         }

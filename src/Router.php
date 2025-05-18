@@ -5,6 +5,7 @@ namespace Goramax\NoctalysFramework;
 use Error;
 use Goramax\NoctalysFramework\Config;
 use Goramax\NoctalysFramework\Hooks;
+use Goramax\NoctalysFramework\Cache;
 
 class Router
 {
@@ -15,6 +16,138 @@ class Router
     private static $params;
     private static $currentPath;
     public static $current_route;
+    private static ?bool $isCacheEnabled = null;
+
+    /**
+     * Check if router cache can be used
+     * 
+     * @return bool True if router cache can be used
+     */
+    private static function canUseCache(): bool
+    {
+        if (self::$isCacheEnabled === null) {
+            $cacheConfig = Config::get('cache');
+            $globalCacheEnabled = $cacheConfig['enabled'] ?? false;
+            $routerCacheEnabled = $cacheConfig['router_cache'] ?? false;
+            self::$isCacheEnabled = $globalCacheEnabled && $routerCacheEnabled;
+        }
+        return self::$isCacheEnabled;
+    }
+
+    /**
+     * Generate a route pattern from a path by replacing parameter values with placeholders
+     * 
+     * @param string $path The actual URL path
+     * @param array $params The extracted parameters
+     * @return string The route pattern
+     */
+    private static function generateRoutePattern(string $path, array $params): string
+    {
+        // Create a pattern by replacing parameter values with placeholders
+        $pattern = $path;
+        $segments = explode('/', trim($path, '/'));
+
+        // For each parameter, replace the value in the path with a placeholder
+        foreach ($params as $name => $value) {
+            $pattern = str_replace('/' . $value, '/{' . $name . '}', $pattern);
+        }
+
+        return $pattern;
+    }
+
+    /**
+     * Find route in the cache using pattern matching
+     * 
+     * @param string $requestPath The request path to look for
+     * @return array|null [controllerFile, params, pattern] if found in cache, null otherwise
+     */
+    private static function findRouteInCache(string $requestPath): ?array
+    {
+        if (!self::canUseCache()) {
+            return null;
+        }
+
+        // Get all cached route patterns
+        $routePatterns = Cache::get('router', 'route_patterns');
+        if (!is_array($routePatterns)) {
+            return null;
+        }
+
+        // Split the request path into segments
+        $requestSegments = explode('/', trim($requestPath, '/'));
+
+        // Try to match against each pattern
+        foreach ($routePatterns as $pattern => $data) {
+            // Skip if pattern is not properly formed
+            if (empty($pattern)) {
+                continue;
+            }
+
+            // Split pattern into segments
+            $patternSegments = explode('/', trim($pattern, '/'));
+
+            // Skip if segment count doesn't match
+            if (count($patternSegments) !== count($requestSegments)) {
+                continue;
+            }
+
+            $params = [];
+            $matched = true;
+
+            // Compare segments
+            for ($i = 0; $i < count($patternSegments); $i++) {
+                $patternSegment = $patternSegments[$i];
+                $requestSegment = $requestSegments[$i];
+
+                // Check if this is a parameter segment
+                if (preg_match('/^\{([a-zA-Z0-9_]+)\}$/', $patternSegment, $matches)) {
+                    // This is a parameter, store its value
+                    $paramName = $matches[1];
+                    $params[$paramName] = $requestSegment;
+                }
+                // Regular segment, must match exactly
+                elseif ($patternSegment !== $requestSegment) {
+                    $matched = false;
+                    break;
+                }
+            }
+
+            if ($matched) {
+                // Return the controller and the extracted parameters
+                return [$data['controller'], $params, $pattern];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Store a route pattern in the cache
+     * 
+     * @param string $pattern The route pattern with {param} placeholders
+     * @param string $controllerFile Path to the controller file
+     * @return bool True on success, false on failure
+     */
+    private static function storeRoutePatternInCache(string $pattern, string $controllerFile): bool
+    {
+        if (!self::canUseCache()) {
+            return false;
+        }
+
+        // Get existing patterns or initialize empty array
+        $patterns = Cache::get('router', 'route_patterns');
+        if (!is_array($patterns)) {
+            $patterns = [];
+        }
+
+        // Add or update this pattern
+        $patterns[$pattern] = [
+            'controller' => $controllerFile
+        ];
+
+        // Store back to cache
+        return Cache::set('router', 'route_patterns', $patterns);
+    }
 
     /**
      * Initialize static properties
@@ -35,10 +168,172 @@ class Router
      * Automatically discover routes
      * @return array $routes
      */
-    private static function autoDiscoverRoutes()
+    private static function autoDiscoverRoutes(): array
     {
-        ErrorHandler::warning("Auto-discovery of routes is not implemented yet.");
-        // Implementation would need to iterate through all directories in self::$pageDirs
+        // First check if we have cached routes
+        if (self::canUseCache()) {
+            $cachedRoutes = Cache::get('router', 'discovered_routes');
+            if ($cachedRoutes !== null) {
+                return $cachedRoutes;
+            }
+        }
+
+        // If no cached routes, perform discovery
+        $routes = [];
+
+        foreach (self::$pageDirs as $pageDir) {
+            self::discoverRoutesInDirectory($pageDir, '', $routes);
+        }
+
+        // Cache the discovered routes if caching is enabled
+        if (self::canUseCache()) {
+            Cache::set('router', 'discovered_routes', $routes);
+        }
+
+        return $routes;
+    }
+
+    /**
+     * Recursively discover routes in a directory
+     * 
+     * @param string $baseDir The base directory to search in
+     * @param string $currentPath The current path relative to the base directory
+     * @param array &$routes Reference to the routes array to populate
+     * @return void
+     */
+    private static function discoverRoutesInDirectory(string $baseDir, string $currentPath, array &$routes): void
+    {
+        $fullPath = $baseDir . $currentPath;
+
+        if (!is_dir($fullPath)) {
+            return;
+        }
+
+        // Check if this directory contains a controller file
+        $dirName = basename($fullPath);
+        $controllerFileName = $dirName . '.controller.php';
+        $controllerFilePath = $fullPath . '/' . $controllerFileName;
+
+        // If controller exists, add to routes
+        if (file_exists($controllerFilePath)) {
+            // Fix for the root route
+            $routePath = $currentPath;
+            if (empty($routePath)) {
+                $routePath = '/home'; // Default to /home for the root
+            }
+            $routes[$routePath] = $controllerFilePath;
+        }
+
+        // Scan directory for subdirectories
+        $items = scandir($fullPath);
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $itemPath = $fullPath . '/' . $item;
+            if (is_dir($itemPath)) {
+                $isParamDir = str_ends_with($item, '_param');
+
+                if ($isParamDir) {
+                    // Extract parameter name from directory name
+                    $paramName = substr($item, 0, -6); // Remove '_param' suffix
+
+                    // Build route path with parameter
+                    $newPath = $currentPath . '/{' . $paramName . '}';
+
+                    // Recursively discover routes in parameter directory
+                    self::discoverRoutesInDirectory($baseDir, $newPath, $routes);
+                } else {
+                    // Normal directory, just append to path
+                    $newPath = $currentPath . '/' . $item;
+
+                    // Recursively discover routes in subdirectory
+                    self::discoverRoutesInDirectory($baseDir, $newPath, $routes);
+                }
+            }
+        }
+    }
+
+    /**
+     * Match a route with parameters
+     * 
+     * @param string $requestPath The request path to match
+     * @param array $routes The discovered routes
+     * @return array|null [controllerFile, params] if match found, null otherwise
+     */
+    private static function matchRoute(string $requestPath, array $routes): ?array
+    {
+        // Check for exact match first
+        if (isset($routes[$requestPath])) {
+            return [$routes[$requestPath], []];
+        }
+
+        // Check cache for this specific path
+        if (self::canUseCache()) {
+            $cachedMatch = Cache::get('router', 'route_match_' . md5($requestPath));
+            if ($cachedMatch !== null) {
+                return $cachedMatch;
+            }
+        }
+
+        // Split request path into segments
+        $requestSegments = explode('/', trim($requestPath, '/'));
+        if (empty($requestSegments[0])) {
+            $requestSegments[0] = 'home'; // Handle root path
+        }
+
+        // Try to match routes with parameters
+        foreach ($routes as $routePath => $controllerFile) {
+            // Skip routes without parameters
+            if (strpos($routePath, '{') === false) {
+                continue;
+            }
+
+            $routeSegments = explode('/', trim($routePath, '/'));
+            if (empty($routeSegments[0])) {
+                $routeSegments[0] = 'home'; // Handle root path
+            }
+
+            // Skip if segment count doesn't match
+            if (count($routeSegments) !== count($requestSegments)) {
+                continue;
+            }
+
+            $params = [];
+            $matched = true;
+
+            // Compare segments
+            for ($i = 0; $i < count($routeSegments); $i++) {
+                $routeSegment = $routeSegments[$i];
+                $requestSegment = $requestSegments[$i];
+
+                // Check if this is a parameter segment
+                if (preg_match('/^\{([a-zA-Z0-9_]+)\}$/', $routeSegment, $matches)) {
+                    // This is a parameter, store its value
+                    $paramName = $matches[1];
+                    $params[$paramName] = $requestSegment;
+                }
+                // Regular segment, must match exactly
+                elseif ($routeSegment !== $requestSegment) {
+                    $matched = false;
+                    break;
+                }
+            }
+
+            if ($matched) {
+                $result = [$controllerFile, $params];
+
+                // Cache this match if caching is enabled
+                if (self::canUseCache()) {
+                    Cache::set('router', 'route_match_' . md5($requestPath), $result);
+                }
+
+                return $result;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -225,48 +520,95 @@ class Router
     public static function dispatch(): void
     {
         $current_route = self::getCurrentRoute();
-        $controllerFile = null;
-        $current_route_array = explode('/', $current_route);
-        $paramRoute = [];
-
         Hooks::run("before_dispatch", $current_route);
-        try {
-            // Try to find the controller file in any of the page directories
-            foreach (self::$pageDirs as $page_dir) {
-                $potential_controller = self::findControllerFile($page_dir . $current_route);
-                if ($potential_controller !== null) {
-                    $controllerFile = $potential_controller;
-                    break;
-                }
-            }
-            if ($controllerFile === null) {
-                // scan for _param folders
-                $paramRoute = self::findParamControllerFile($current_route_array);
-                if ($paramRoute !== null) {
-                    $controllerFolder = $paramRoute;
-                    $params =  self::getParams();
-                    $controllerFile = self::findControllerFile($controllerFolder);
-                }
-            }
-            // If there is no controller file or the page corresponds to the error page (404)
-            if ($controllerFile === null || $page_dir . $current_route === self::$errorPage) {
-                self::error("404");
-                Hooks::run("after_dispatch", $current_route, $current_route_array);
-                return;
-            }
-            self::$currentPath = $controllerFile;
-            require_once $controllerFile;
-            $controllerClass = self::findControllerClass($controllerFile);
 
-            if ($controllerClass) {
-                $controller = new $controllerClass();
-                $controller->main();
+        try {
+            // Try to find route in cache first using pattern matching
+            $matchResult = self::findRouteInCache($current_route);
+
+            if ($matchResult !== null) {
+                // We found a cached route pattern match
+                list($controllerFile, $params, $pattern) = $matchResult;
+
+                // Set params for retrieval via getParams()
+                self::$params = $params;
+
+                // Execute the controller
+                self::$currentPath = $controllerFile;
+                require_once $controllerFile;
+                $controllerClass = self::findControllerClass($controllerFile);
+
+                if ($controllerClass) {
+                    $controller = new $controllerClass();
+                    $controller->main();
+                }
+            } else {
+                // Route not in cache, use standard route finding logic
+                $controllerFile = null;
+                $current_route_array = explode('/', $current_route);
+
+                // Try to find the controller file in any of the page directories
+                foreach (self::$pageDirs as $page_dir) {
+                    $potential_controller = self::findControllerFile($page_dir . $current_route);
+                    if ($potential_controller !== null) {
+                        $controllerFile = $potential_controller;
+                        break;
+                    }
+                }
+
+                if ($controllerFile === null) {
+                    // scan for _param folders
+                    $paramRoute = self::findParamControllerFile($current_route_array);
+                    if ($paramRoute !== null) {
+                        $controllerFolder = $paramRoute;
+                        $params = self::getParams();
+                        $controllerFile = self::findControllerFile($controllerFolder);
+                    }
+                }
+
+                // If there is no controller file or the page corresponds to the error page (404)
+                $isErrorPage = false;
+                foreach (self::$pageDirs as $pageDir) {
+                    if ($pageDir . $current_route === self::$errorPage) {
+                        $isErrorPage = true;
+                        break;
+                    }
+                }
+
+                if ($controllerFile === null || $isErrorPage) {
+                    self::error(404);
+                    Hooks::run("after_dispatch", $current_route, $current_route_array);
+                    return;
+                }
+
+                // If this was a route with parameters, create and store a pattern
+                if (!empty(self::$params)) {
+                    $pattern = self::generateRoutePattern($current_route, self::$params);
+                    self::storeRoutePatternInCache($pattern, $controllerFile);
+                }
+                // For static routes, store with exact path
+                else {
+                    self::storeRoutePatternInCache($current_route, $controllerFile);
+                }
+
+                // Execute the controller
+                self::$currentPath = $controllerFile;
+                require_once $controllerFile;
+                $controllerClass = self::findControllerClass($controllerFile);
+
+                if ($controllerClass) {
+                    $controller = new $controllerClass();
+                    $controller->main();
+                }
             }
         } catch (Error $e) {
             if (Config::get('app')['debug'] == false) {
                 self::error(500, $e->getMessage());
+            } else {
+                throw $e; // Rethrow for easier debugging when in debug mode
             }
         }
+
         Hooks::run("after_dispatch", $current_route);
     }
 
