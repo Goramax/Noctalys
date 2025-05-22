@@ -1,9 +1,11 @@
 <?php
+
 use Goramax\NoctalysFramework\Component;
 use Goramax\NoctalysFramework\Finder;
 use Goramax\NoctalysFramework\File;
 use Goramax\NoctalysFramework\Config;
 use Goramax\NoctalysFramework\ErrorHandler;
+use Goramax\NoctalysFramework\Asset;
 
 /**
  * Render a view
@@ -34,7 +36,7 @@ function render_component(string $component, array $data = [], string $extension
  * @param array $limitDirectories directories to limit the search to
  * if there are subfolders, use the following format: folder1/folder2/example.jpg
  */
-function img(string $name, array $limitDirectories = ['images', 'imgs' ]): string
+function img(string $name, array $limitDirectories = ['images', 'imgs']): string
 {
     try {
         $imgsrc = Finder::findFile($name, Config::get('assets'), nested: true, limitDirectories: $limitDirectories);
@@ -97,4 +99,40 @@ function svg(string $name, array $attributes = []): void
 function file_content(string $path): string | null
 {
     return File::read($path);
+}
+
+/**
+ * Returns the path of a generated css asset
+ * @param string $name asset name (without extension)
+ */
+function css_path(string $name): string
+{
+    if (empty($name)) {
+        ErrorHandler::warning("Asset name is empty", depth: 3);
+        return "";
+    }
+    try {
+        return Asset::getPath('css', $name);
+    } catch (Exception $e) {
+        ErrorHandler::warning($e->getMessage(), depth: 3);
+        return "";
+    }
+}
+
+/**
+ * Returns the path of a generated js asset
+ * @param string $name asset name (without extension)
+ */
+function js_path(string $name): string
+{
+    if (empty($name)) {
+        ErrorHandler::warning("Asset name is empty", depth: 3);
+        return "";
+    }
+    try {
+        return Asset::getPath('js', $name);
+    } catch (Exception $e) {
+        ErrorHandler::warning($e->getMessage(), depth: 3);
+        return "";
+    }
 }

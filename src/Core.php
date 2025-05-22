@@ -21,6 +21,11 @@ class Core
         set_exception_handler([ErrorHandler::class, 'handleException']);
         Env::load();
         Hooks::setup();
+        if (Env::get('APP_ENV') === 'dev') {
+            Hooks::add('after_layout', function () {
+                echo '<script type="module" src="http://localhost:5173/@vite/client"></script>';
+            });
+        }
     }
 
     private function routersDispatch($start)
@@ -42,7 +47,8 @@ class Core
             echo "<span class='durationdebug'>" . round(($end - $start) * 1000, 2) . " ms</span>";
         }
     }
-    private function applyPhPIni() {
+    private function applyPhPIni()
+    {
         if (Config::get('app')['debug']) {
             ini_set('display_errors', 1);
             ini_set('error_reporting', E_ALL);
