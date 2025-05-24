@@ -13,6 +13,7 @@ class File
      * @param array $allowedExtensions List of allowed file extensions (default: ['jpg', 'jpeg', 'png', 'svg', 'webp', 'pdf'])
      * @param int $maxSize Maximum allowed file size in bytes (default: 500000)
      * @param bool $canCreateDir Whether to create the destination directory if it doesn't exist (default: true)
+     * @param bool $forceInsecure Disable MIME type validation (default: false)
      * @return string|null The sanitized filename if upload was successful, null otherwise
      */
     public static function upload(
@@ -20,7 +21,8 @@ class File
         string $destination,
         array $allowedExtensions = ['jpg', 'jpeg', 'png', 'svg', 'webp', 'pdf'],
         int $maxSize = 500000,
-        bool $canCreateDir = true
+        bool $canCreateDir = true,
+        bool $forceInsecure = false
     ): string|null {
         if (!isset($_FILES[$inputName]) || $_FILES[$inputName]['error'] === UPLOAD_ERR_NO_FILE) {
             return null;
@@ -37,6 +39,10 @@ class File
         $safeName = self::sanitizeName(pathinfo($originalName, PATHINFO_FILENAME)) . '.' . $extension;
 
         if (!in_array($extension, $allowedExtensions)) throw new \ErrorException('Invalid file type, allowed types: ' . implode(', ', $allowedExtensions), 0, E_USER_ERROR);
+
+        if (!$forceInsecure) {
+            self::validateMime($file['tmp_name'], $extension);
+        }
 
         if ($canCreateDir && !is_dir($destination)) {
             if (!mkdir($destination, recursive: true)) throw new \ErrorException('Failed to create directory', 0, E_USER_ERROR);
@@ -175,5 +181,24 @@ class File
      */
     public static function sanitizeName(string $name): string {
         return substr(preg_replace('/[^a-zA-Z0-9_\-]/', '_', $name), 0, 100);
+    }
+
+    /**
+     * Ensures the uploaded file's MIME type matches its extension
+     *
+     * @param string $tmpPath Path to the temporary uploaded file
+     * @param string $extension File extension to validate against
+     * @throws \ErrorException on mismatch or unknown extension
+     */
+    private static function validateMime(string $tmpPath, string $extension): void {
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($tmpPath) ?: '';
+        // Extract subtype (part after '/'), fallback to empty
+        $parts = explode('/', $mimeType, 2);
+        $subtype = $parts[1] ?? '';
+        // Accept when subtype exactly matches extension or ends with '+extension'
+        if ($subtype !== $extension && !str_ends_with($subtype, '+' . $extension)) {
+            throw new \ErrorException("MIME type '{$mimeType}' does not match extension '{$extension}'", 0, E_USER_ERROR);
+        }
     }
 }
