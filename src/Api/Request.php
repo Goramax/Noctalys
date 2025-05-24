@@ -40,7 +40,12 @@ class Request
         if (curl_errno($ch)) {
             $error = curl_error($ch);
             curl_close($ch);
-            throw new \ErrorException("cURL error: $error", 0, E_USER_WARNING);
+            trigger_error("cURL error: $error", E_USER_WARNING);
+            return [
+                'success' => false,
+                'error' => $error,
+                'status' => 0
+            ];
         }
 
         curl_close($ch);

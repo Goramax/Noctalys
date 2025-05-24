@@ -37,6 +37,7 @@ class Asset
             return $publicPath . $manifest[$assetKey];
         }
         
-        throw new \ErrorException('Asset not found in manifest: ' . $name, 0, E_USER_WARNING);
+        trigger_error('Asset not found in manifest: ' . $name, E_USER_WARNING);
+        return '';
     }
 }

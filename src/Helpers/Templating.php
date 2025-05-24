@@ -50,11 +50,11 @@ function img(string $name, array $limitDirectories = ['images', 'imgs']): string
         if ($imgsrc === null) {
             return "";
         }
-        return $imgsrc;
     } catch (Exception $e) {
         trigger_error("Image file not found: " . $name, E_USER_WARNING);
         return "";
     }
+    return $imgsrc;
 }
 
 /**

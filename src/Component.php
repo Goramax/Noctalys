@@ -71,12 +71,13 @@ class Component
                 echo $twig->render(basename($component), $data);
                 return true;
             } catch (\Exception $e) {
-                throw new \ErrorException("Error rendering Twig component: " . $e->getMessage(), 0, E_USER_WARNING);
+                trigger_error("Error rendering Twig component: " . $e->getMessage(), E_USER_WARNING);
+                return false;
             }
         } else {
-            throw new \ErrorException("Twig environment not available", 0, E_USER_WARNING);
+            trigger_error("Twig environment not available", E_USER_WARNING);
+            return false;
         }
-        return false;
     }
     
     /**
@@ -101,12 +102,13 @@ class Component
                 }
                 return true;
             } catch (\Exception $e) {
-                throw new \ErrorException("Error rendering Smarty component: " . $e->getMessage(), 0, E_USER_WARNING);
+                trigger_error("Error rendering Smarty component: " . $e->getMessage(), E_USER_WARNING);
+                return false;
             }
         } else {
-            throw new \ErrorException("Smarty environment not available", 0, E_USER_WARNING);
+            trigger_error("Smarty environment not available", E_USER_WARNING);
+            return false;
         }
-        return false;
     }
     
     /**
@@ -124,12 +126,13 @@ class Component
                 echo $latte->renderToString($component, $data);
                 return true;
             } catch (\Exception $e) {
-                throw new \ErrorException("Error rendering Latte component: " . $e->getMessage(), 0, E_USER_WARNING);
+                trigger_error("Error rendering Latte component: " . $e->getMessage(), E_USER_WARNING);
+                return false;
             }
         } else {
-            throw new \ErrorException("Latte environment not available", 0, E_USER_WARNING);
+            trigger_error("Latte environment not available", E_USER_WARNING);
+            return false;
         }
-        return false;
     }
     
     /**

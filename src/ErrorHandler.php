@@ -97,7 +97,7 @@ class ErrorHandler
      * @param int $depth The depth of the stack trace to use for context
      * @return void
      */
-    public static function warning(string $message, string $errorType = "warn", int $depth = 1, \Exception $exception = null): void
+    private static function warning(string $message, string $errorType = "warn", int $depth = 1, \Exception $exception = null): void
     {
         // Determine origin: seek first user file (.view., .layout. or .component.) in trace
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
@@ -137,12 +137,7 @@ class ErrorHandler
 
         error_log("Warning : $message (called at $file:$line)", 0);
         Hooks::run("on_warning", $message, $file, $line, $error);
-
-        try {
-            $debugMode = Config::get('app')['debug'] ?? false;
-        } catch (\Exception $e) {
-            $debugMode = false;
-        }
+        $debugMode = Config::get('app')['debug'] ?? false;
 
         if ($debugMode) {
             echo '<div class="noctalys-warn" style="background-color: #ffc50c; color: #333; padding: 10px; border-radius: 5px; margin: 10px 0;">';
@@ -160,33 +155,86 @@ class ErrorHandler
      * @return never
      * @throws \ErrorException
      */
-    public static function fatal(string $message, string $errorType = "error", int $depth = 0, Error $errorObject = null): never
+    private static function fatal(string $message, string $errorType = "error", int $depth = 0, \Throwable $errorObject = null): never
     {
 
-        if ($errorObject !== null) {
-            $trace = $errorObject->getTrace();
-        } else {
-            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, $depth);
+        // Use debug_backtrace to capture all frames including template/view includes
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        // Optionally remove the first fatal/handleException frames
+        // Remove frames up to this method call
+        while (isset($trace[0]['function']) && in_array($trace[0]['function'], ['handleException', 'fatal'], true)) {
+            array_shift($trace);
         }
 
 
-        // Chercher un fichier .view. dans la trace
-
+        // Determine initial origin from exception
         $file = $errorObject?->getFile() ?? 'unknown file';
         $line = $errorObject?->getLine() ?? 'unknown line';
-        $stackString = $errorObject?->getTraceAsString() ?? '';
 
-        foreach ($trace as $traceItem) {
-            if (isset($traceItem['file']) && strpos($traceItem['file'], '.view.') !== false) {
-                $file = $traceItem['file'];
-                $line = $traceItem['line'] ?? 'unknown line';
-                break;
+        // If exception occurred in a template/component file, keep it
+        $baseFile = basename($file);
+        if (preg_match('/\.component\.|\.view\.|\.layout\./', $baseFile)) {
+            // Use this as origin, skip further search
+        } else {
+            // Search trace for priority matches
+            // Reverse trace to search deeper frames first
+            $frames = array_reverse($trace);
+            $found = false;
+            // Look for component, view, layout, then controller
+            foreach ($frames as $frame) {
+                if (empty($frame['file'])) continue;
+                $f = $frame['file'];
+                $base = basename($f);
+                if (preg_match('/\.component\./', $base)) {
+                    $file = $f;
+                    $line = $frame['line'] ?? $line;
+                    $found = true;
+                    break;
+                }
+                if (preg_match('/\.view\./', $base)) {
+                    $file = $f;
+                    $line = $frame['line'] ?? $line;
+                    $found = true;
+                    break;
+                }
+                if (preg_match('/\.layout\./', $base)) {
+                    $file = $f;
+                    $line = $frame['line'] ?? $line;
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                // Try to find any application view under src/Frontend
+                foreach ($frames as $frame) {
+                    if (!empty($frame['file']) && strpos($frame['file'], DIRECTORY . '/Frontend') !== false) {
+                        $file = $frame['file'];
+                        $line = $frame['line'] ?? $line;
+                        $found = true;
+                        break;
+                    }
+                }
+            }
+            if (!$found) {
+                foreach ($frames as $frame) {
+                    if (!empty($frame['file']) && preg_match('/controller\.php$/', basename($frame['file']))) {
+                        $file = $frame['file'];
+                        $line = $frame['line'] ?? $line;
+                        break;
+                    }
+                }
             }
         }
 
 
         $error = self::convertToErrorType($errorType);
 
+        if ($errorObject instanceof \Throwable) {
+            $stackString = $errorObject->getTraceAsString();
+        } else {
+            // Fallback to printing the backtrace array
+            $stackString = print_r($trace, true);
+        }
         error_log("Fatal : $message (called at $file:$line)", 0);
 
         Hooks::run("on_error", $message, $file, $line, $error);
@@ -267,7 +315,8 @@ class ErrorHandler
             // Warning-like severities
             $warningSeverities = [E_USER_WARNING, E_WARNING, E_USER_NOTICE, E_NOTICE, E_DEPRECATED, E_USER_DEPRECATED];
             if (in_array($severity, $warningSeverities, true)) {
-                self::warning($msg, 'warn', 0, $exception);
+                // For native warnings, clear exception so warning() uses trace to find template/view origin
+                self::warning($msg, 'warn', 2, null);
             } else {
                 self::fatal($msg, 'error', 0, $exception);
             }

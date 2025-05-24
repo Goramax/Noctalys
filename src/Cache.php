@@ -46,13 +46,14 @@ class Cache
             // Make sure the cache folder exists
             if (!file_exists(self::$cacheFolder)) {
                 if (!mkdir(self::$cacheFolder, 0755, true)) {
-                    throw new \ErrorException('Failed to create cache folder: ' . self::$cacheFolder, 0, E_USER_WARNING);
+                    trigger_error('Failed to create cache folder: ' . self::$cacheFolder, E_USER_WARNING);
+                    return false;
                 }
             }
 
             // If enabled in config but not available, trigger warning
             if (self::$isEnabled && !self::$isAvailable) {
-                throw new \ErrorException('APCu cache is enabled in configuration but not available on the server', 0, E_USER_WARNING);
+                trigger_error('APCu cache is enabled in configuration but not available on the server', E_USER_WARNING);
             }
         }
 

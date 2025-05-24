@@ -67,7 +67,8 @@ class File
             if (!file_exists(filename: $path)) return null;
             return file_get_contents($path);
         } catch (Exception) {
-            throw new \ErrorException("File not found: " . $filePath, 0, E_USER_WARNING);
+            trigger_error("File not found: " . $filePath, E_USER_WARNING);
+            return null;
         }
     }
 
@@ -93,7 +94,8 @@ class File
             }
             return $files;
         } catch (Exception) {
-            throw new \ErrorException("Directory not found: " . $path, 0, E_USER_WARNING);
+            trigger_error("Directory not found: " . $path, E_USER_WARNING);
+            return [];
         }
     }
     

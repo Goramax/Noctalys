@@ -163,7 +163,8 @@ class Finder
             
             return $file;
         } catch (\Exception $e) {
-            throw new \ErrorException("Component file not found: $fileName", 0, E_USER_WARNING);
+            trigger_error("Component file not found: $fileName", E_USER_WARNING);
+            return null;
         }
     }
 }
