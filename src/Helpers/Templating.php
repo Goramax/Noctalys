@@ -3,9 +3,16 @@
 use Goramax\NoctalysFramework\Component;
 use Goramax\NoctalysFramework\Finder;
 use Goramax\NoctalysFramework\File;
-use Goramax\NoctalysFramework\Config;
-use Goramax\NoctalysFramework\ErrorHandler;
 use Goramax\NoctalysFramework\Asset;
+
+const PUBLIC_ASSETS_FOLDER = [
+    'sources' => [
+        [
+            'folder_name' => 'assets',
+            'path' => 'public'
+        ]
+    ]
+];
 
 /**
  * Render a view
@@ -17,14 +24,14 @@ use Goramax\NoctalysFramework\Asset;
 function render_component(string $component, array $data = [], string $extension = 'php'): void
 {
     if (empty($component)) {
-        ErrorHandler::warning("Component name is empty", depth: 3);
+        trigger_error("Component name is empty", E_USER_WARNING);
         return;
     }
     if (empty($data)) {
         $data = [];
     }
     if (!is_array($data)) {
-        ErrorHandler::warning("Data must be an array", depth: 3);
+        trigger_error("Data must be an array", E_USER_WARNING);
         return;
     }
     Component::load($component, $data, $extension);
@@ -39,13 +46,13 @@ function render_component(string $component, array $data = [], string $extension
 function img(string $name, array $limitDirectories = ['images', 'imgs']): string
 {
     try {
-        $imgsrc = Finder::findFile($name, Config::get('assets'), nested: true, limitDirectories: $limitDirectories);
+        $imgsrc = Finder::findFile($name, PUBLIC_ASSETS_FOLDER, nested: true, limitDirectories: $limitDirectories);
         if ($imgsrc === null) {
             return "";
         }
         return $imgsrc;
     } catch (Exception $e) {
-        ErrorHandler::warning("Image file not found: " . $name, depth: 3);
+        trigger_error("Image file not found: " . $name, E_USER_WARNING);
         return "";
     }
 }
@@ -63,15 +70,15 @@ function svg(string $name, array $attributes = []): void
         if (!str_ends_with($name, '.svg')) {
             $name .= '.svg';
         }
-        $svgsrc = Finder::findFile($name, Config::get('assets'), nested: true, limitDirectories: ['svgs', 'svg', 'img', 'imgs']);
+        $svgsrc = Finder::findFile($name, PUBLIC_ASSETS_FOLDER, nested: true, limitDirectories: ['svgs', 'svg', 'img', 'imgs']);
         if ($svgsrc === null) {
-            ErrorHandler::warning("SVG file not found: " . $name, depth: 3);
+            trigger_error("SVG file not found: " . $name, E_USER_WARNING);
             return;
         }
         $svg = file_get_contents($svgsrc);
         $svg = preg_replace('/<script.*?<\/script>/is', '', $svg);
         if ($svg === false) {
-            ErrorHandler::warning("Failed to read SVG file: " . $name, depth: 3);
+            trigger_error("Failed to read SVG file: " . $name, E_USER_WARNING);
             return;
         }
         if (preg_match('/<svg\s([^>]+)>/i', $svg, $matches)) {
@@ -86,7 +93,7 @@ function svg(string $name, array $attributes = []): void
         echo $svg;
         return;
     } catch (Exception $e) {
-        ErrorHandler::warning("SVG file not found: " . $name, depth: 3);
+        trigger_error("SVG file not found: " . $name, E_USER_WARNING);
         return;
     }
 }
@@ -108,13 +115,13 @@ function file_content(string $path): string | null
 function css_path(string $name): string
 {
     if (empty($name)) {
-        ErrorHandler::warning("Asset name is empty", depth: 3);
+        trigger_error("Asset name is empty", E_USER_WARNING);
         return "";
     }
     try {
         return Asset::getPath('css', $name);
     } catch (Exception $e) {
-        ErrorHandler::warning($e->getMessage(), depth: 3);
+        trigger_error($e->getMessage(), E_USER_WARNING);
         return "";
     }
 }
@@ -126,13 +133,13 @@ function css_path(string $name): string
 function js_path(string $name): string
 {
     if (empty($name)) {
-        ErrorHandler::warning("Asset name is empty", depth: 3);
+        trigger_error("Asset name is empty", E_USER_WARNING);
         return "";
     }
     try {
         return Asset::getPath('js', $name);
     } catch (Exception $e) {
-        ErrorHandler::warning($e->getMessage(), depth: 3);
+        trigger_error($e->getMessage(), E_USER_WARNING);
         return "";
     }
 }

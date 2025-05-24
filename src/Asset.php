@@ -2,8 +2,6 @@
 
 namespace Goramax\NoctalysFramework;
 
-use Goramax\NoctalysFramework\ErrorHandler;
-
 class Asset
 {
     /**
@@ -23,12 +21,12 @@ class Asset
         match ($type) {
             'css' => $folder = 'styles',
             'js' => $folder = 'js',
-            default => ErrorHandler::fatal('Invalid asset type: ' . $type),
+            default => throw new \ErrorException('Invalid asset type: ' . $type, 0, E_USER_ERROR),
         };
 
         $manifestFile = $publicFolder . 'manifest.json';
         if (!file_exists($manifestFile)) {
-            ErrorHandler::fatal('Manifest file not found: ' . $manifestFile . ' please run the build command to generate it');
+            throw new \ErrorException('Manifest file not found: ' . $manifestFile . ' please run the build command to generate it', 0, E_USER_ERROR);
         }
         
         $manifest = json_decode(file_get_contents($manifestFile), true);
@@ -39,7 +37,6 @@ class Asset
             return $publicPath . $manifest[$assetKey];
         }
         
-        ErrorHandler::warning('Asset not found in manifest: ' . $name, 'warning');
-        return $publicPath . $folder . '/' . $name;
-        }
+        throw new \ErrorException('Asset not found in manifest: ' . $name, 0, E_USER_WARNING);
+    }
 }

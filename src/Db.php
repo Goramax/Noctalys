@@ -3,7 +3,6 @@
 namespace Goramax\NoctalysFramework;
 use PDO;
 use PDOException;
-use Goramax\NoctalysFramework\ErrorHandler;
 
 class Db{
     private static ?PDO $pdo = null;
@@ -32,12 +31,12 @@ class Db{
                 'pgsql' => "pgsql:host=$host;dbname=$dbname" . ($port ? ";port=$port" : ''),
                 'sqlite' => "sqlite:$dbname",
                 'sqlsrv' => "sqlsrv:Server=$host" . ($port ? ",$port" : '') . ";Database=$dbname",
-                default => ErrorHandler::fatal("Unsupported database driver: $driver", "error"),
+                default => throw new \ErrorException("Unsupported database driver: $driver", 0, E_USER_ERROR),
             };
             self::$pdo = new PDO($dsn, $username, $password, $options);
 
         } catch (PDOException $e) {
-            ErrorHandler::fatal($e->getMessage(), "error", 2);
+            throw new \ErrorException($e->getMessage(), 0, E_USER_ERROR);
         }
     }
 

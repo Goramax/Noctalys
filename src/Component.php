@@ -4,7 +4,6 @@ namespace Goramax\NoctalysFramework;
 
 use Goramax\NoctalysFramework\Finder;
 use Goramax\NoctalysFramework\Hooks;
-use Goramax\NoctalysFramework\ErrorHandler;
 
 class Component
 {
@@ -72,10 +71,10 @@ class Component
                 echo $twig->render(basename($component), $data);
                 return true;
             } catch (\Exception $e) {
-                ErrorHandler::warning("Error rendering Twig component: " . $e->getMessage(), depth: 3);
+                throw new \ErrorException("Error rendering Twig component: " . $e->getMessage(), 0, E_USER_WARNING);
             }
         } else {
-            ErrorHandler::warning("Twig environment not available", depth: 3);
+            throw new \ErrorException("Twig environment not available", 0, E_USER_WARNING);
         }
         return false;
     }
@@ -102,10 +101,10 @@ class Component
                 }
                 return true;
             } catch (\Exception $e) {
-                ErrorHandler::warning("Error rendering Smarty component: " . $e->getMessage(), depth: 3);
+                throw new \ErrorException("Error rendering Smarty component: " . $e->getMessage(), 0, E_USER_WARNING);
             }
         } else {
-            ErrorHandler::warning("Smarty environment not available", depth: 3);
+            throw new \ErrorException("Smarty environment not available", 0, E_USER_WARNING);
         }
         return false;
     }
@@ -125,10 +124,10 @@ class Component
                 echo $latte->renderToString($component, $data);
                 return true;
             } catch (\Exception $e) {
-                ErrorHandler::warning("Error rendering Latte component: " . $e->getMessage(), depth: 3);
+                throw new \ErrorException("Error rendering Latte component: " . $e->getMessage(), 0, E_USER_WARNING);
             }
         } else {
-            ErrorHandler::warning("Latte environment not available", depth: 3);
+            throw new \ErrorException("Latte environment not available", 0, E_USER_WARNING);
         }
         return false;
     }

@@ -499,7 +499,7 @@ class Router
     {
         $controllerFile = self::findControllerFile(self::$errorPage);
         if (!$controllerFile) {
-            ErrorHandler::fatal("Controller file not found at " . self::$errorPage);
+            throw new \ErrorException("Controller file not found at " . self::$errorPage, 0, E_USER_ERROR);
         }
         self::$currentPath = $controllerFile;
         require_once $controllerFile;

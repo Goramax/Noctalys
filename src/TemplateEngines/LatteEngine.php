@@ -5,7 +5,6 @@ namespace Goramax\NoctalysFramework\TemplateEngines;
 use Goramax\NoctalysFramework\TemplateEngines\TemplateEngineInterface;
 use Goramax\NoctalysFramework\Finder;
 use Goramax\NoctalysFramework\Hooks;
-use Goramax\NoctalysFramework\ErrorHandler;
 use Goramax\NoctalysFramework\Env;
 use Latte\Engine;
 
@@ -36,9 +35,11 @@ class LatteEngine implements TemplateEngineInterface
         $this->options = array_merge($defaultOptions, $options);
         
         if (!class_exists('Latte\Engine')) {
-            ErrorHandler::fatal(
+            throw new \ErrorException(
                 "Latte is not installed. Please install it using Composer: \n" .
-                "composer require latte/latte"
+                "composer require latte/latte",
+                0,
+                E_USER_ERROR
             );
         }
         
@@ -121,11 +122,11 @@ class LatteEngine implements TemplateEngineInterface
         $layoutFile = Finder::findLayout($layout, 'latte');
 
         if (!file_exists($viewFile)) {
-            ErrorHandler::fatal("View file not found: $viewFile");
+            throw new \ErrorException("View file not found: $viewFile", 0, E_USER_ERROR);
         }
 
         if (!$layoutFile) {
-            ErrorHandler::fatal("Layout not found: $layout");
+            throw new \ErrorException("Layout not found: $layout", 0, E_USER_ERROR);
         }
         
         // Run before layout hooks

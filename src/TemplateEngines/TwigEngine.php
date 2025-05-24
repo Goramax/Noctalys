@@ -7,7 +7,6 @@ use Goramax\NoctalysFramework\Router;
 use Goramax\NoctalysFramework\Finder;
 use Goramax\NoctalysFramework\Hooks;
 use Goramax\NoctalysFramework\Env;
-use Goramax\NoctalysFramework\ErrorHandler;
 use \Twig\Environment;
 use \Twig\Loader\FilesystemLoader;
 use \Twig\TwigFunction;
@@ -23,13 +22,15 @@ class TwigEngine implements TemplateEngineInterface
         $this->currentFolder = $currentFolder;
         // Ensure the directory exists before creating the loader
         if (!is_dir($currentFolder)) {
-            ErrorHandler::fatal("Directory not found: $currentFolder");
+            throw new \ErrorException("Directory not found: $currentFolder", 0, E_USER_ERROR);
         }
         
         if (!class_exists('Twig\Environment')) {
-            ErrorHandler::fatal(
+            throw new \ErrorException(
                 "Twig is not installed. Please install it using Composer: \n" .
-                "composer require 'twig/twig:^3.0'"
+                "composer require 'twig/twig:^3.0'",
+                0,
+                E_USER_ERROR
             );
         }
         
@@ -97,7 +98,7 @@ class TwigEngine implements TemplateEngineInterface
         $viewFile = "$view.view.twig";
         $layoutFile = Finder::findLayout($layout, 'twig');
         if (!$layoutFile) {
-            ErrorHandler::fatal("Layout file not found: $layout");
+            throw new \ErrorException("Layout file not found: $layout", 0, E_USER_ERROR);
         }
         
         // Run before layout hooks
@@ -112,7 +113,7 @@ class TwigEngine implements TemplateEngineInterface
         try {
             $viewContent = $this->twig->render("$view.view.twig", $data);
         } catch (\Exception $e) {
-            ErrorHandler::fatal("Error rendering view '$view': " . $e->getMessage());
+            throw new \ErrorException("Error rendering view '$view': " . $e->getMessage(), 0, E_USER_ERROR);
         }
         
         // Wrap view content with data-view attribute

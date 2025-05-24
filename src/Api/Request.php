@@ -1,7 +1,6 @@
 <?php
 
 namespace Goramax\NoctalysFramework\Api;
-use Goramax\NoctalysFramework\ErrorHandler;
 use Goramax\NoctalysFramework\Hooks;
 
 class Request
@@ -41,12 +40,7 @@ class Request
         if (curl_errno($ch)) {
             $error = curl_error($ch);
             curl_close($ch);
-            ErrorHandler::warning("cURL error: $error");
-            return [
-                'success' => false,
-                'error' => $error,
-                'status' => 0
-            ];
+            throw new \ErrorException("cURL error: $error", 0, E_USER_WARNING);
         }
 
         curl_close($ch);

@@ -6,7 +6,6 @@ use Goramax\NoctalysFramework\TemplateEngines\TemplateEngineInterface;
 use Goramax\NoctalysFramework\Finder;
 use Goramax\NoctalysFramework\Hooks;
 use Goramax\NoctalysFramework\Env;
-use Goramax\NoctalysFramework\ErrorHandler;
 use Smarty\Smarty;
 
 class SmartyEngine implements TemplateEngineInterface
@@ -39,9 +38,11 @@ class SmartyEngine implements TemplateEngineInterface
         $this->options = array_merge($defaultOptions, $options);
         
         if (!class_exists('Smarty\Smarty')) {
-            ErrorHandler::fatal(
+            throw new \ErrorException(
                 "Smarty is not installed. Please install it using Composer: \n" .
-                "composer require smarty/smarty"
+                "composer require smarty/smarty",
+                0,
+                E_USER_ERROR
             );
         }
         
@@ -138,11 +139,11 @@ class SmartyEngine implements TemplateEngineInterface
         $layoutFile = Finder::findLayout($layout, 'tpl');
 
         if (!file_exists($viewFile)) {
-            ErrorHandler::fatal("View file not found: $viewFile");
+            throw new \ErrorException("View file not found: $viewFile", 0, E_USER_ERROR);
         }
 
         if (!$layoutFile) {
-            ErrorHandler::fatal("Layout not found: $layout");
+            throw new \ErrorException("Layout not found: $layout", 0, E_USER_ERROR);
         }
         
         // Run before layout hooks

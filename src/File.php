@@ -2,8 +2,6 @@
 namespace Goramax\NoctalysFramework;
 
 use Exception;
-use Goramax\NoctalysFramework\ErrorHandler;
-use Goramax\NoctalysFramework\Finder;
 
 class File
 {
@@ -31,18 +29,18 @@ class File
         $file = $_FILES[$inputName];
         var_dump($_FILES[$inputName]);
 
-        if ($file['error'] !== UPLOAD_ERR_OK) ErrorHandler::fatal('File upload error: ' . $file['error'], depth:1);
-        if ($file['size'] > $maxSize) ErrorHandler::fatal('File size exceeds limit', depth:2);
+        if ($file['error'] !== UPLOAD_ERR_OK) throw new \ErrorException('File upload error: ' . $file['error'], 0, E_USER_ERROR);
+        if ($file['size'] > $maxSize) throw new \ErrorException('File size exceeds limit', 0, E_USER_ERROR);
 
         $originalName = basename($file['name']);
         $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         $safeName = self::sanitizeName(pathinfo($originalName, PATHINFO_FILENAME)) . '.' . $extension;
 
-        if (!in_array($extension, $allowedExtensions)) ErrorHandler::fatal('Invalid file type, allowed types: ' . implode(', ', $allowedExtensions), depth:1);
+        if (!in_array($extension, $allowedExtensions)) throw new \ErrorException('Invalid file type, allowed types: ' . implode(', ', $allowedExtensions), 0, E_USER_ERROR);
 
         if ($canCreateDir && !is_dir($destination)) {
-            if (!mkdir($destination, recursive: true)) ErrorHandler::fatal('Failed to create directory', depth:1);
-        } elseif (!$canCreateDir && !is_dir($destination)) ErrorHandler::fatal('Directory does not exist', depth:1);
+            if (!mkdir($destination, recursive: true)) throw new \ErrorException('Failed to create directory', 0, E_USER_ERROR);
+        } elseif (!$canCreateDir && !is_dir($destination)) throw new \ErrorException('Directory does not exist', 0, E_USER_ERROR);
 
         $target = rtrim($destination, '/') . '/' . $safeName;
         $i = 1;
@@ -52,7 +50,7 @@ class File
             $i++;
         }
 
-        if (!move_uploaded_file($file['tmp_name'], $target)) ErrorHandler::fatal('Failed to move file', depth:1);
+        if (!move_uploaded_file($file['tmp_name'], $target)) throw new \ErrorException('Failed to move file', 0, E_USER_ERROR);
 
         return $safeName;
     }
@@ -69,8 +67,7 @@ class File
             if (!file_exists(filename: $path)) return null;
             return file_get_contents($path);
         } catch (Exception) {
-            ErrorHandler::warning("File not found: " . $filePath, depth: 3);
-            return null;
+            throw new \ErrorException("File not found: " . $filePath, 0, E_USER_WARNING);
         }
     }
 
@@ -96,8 +93,7 @@ class File
             }
             return $files;
         } catch (Exception) {
-            ErrorHandler::warning("Directory not found: " . $path, depth: 3);
-            return [];
+            throw new \ErrorException("Directory not found: " . $path, 0, E_USER_WARNING);
         }
     }
     

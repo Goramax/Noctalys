@@ -19,6 +19,7 @@ class Core
         define("DIRECTORY", getcwd());
         require_once __DIR__ . '/Helpers/Helpers.php';
         set_exception_handler([ErrorHandler::class, 'handleException']);
+        set_error_handler([ErrorHandler::class, 'handleException']);
         Env::load();
         Hooks::setup();
         if (Env::get('APP_ENV') === 'dev') {

@@ -1,7 +1,6 @@
 <?php
 
 namespace Goramax\NoctalysFramework;
-use Goramax\NoctalysFramework\ErrorHandler;
 
 class Config
 {
@@ -43,7 +42,7 @@ class Config
             $config = array_merge(self::$configContent, $config);
             return $config;
         } else {
-            ErrorHandler::fatal("Config file not found: $configFile");
+            throw new \ErrorException("Config file not found: $configFile", 0, E_USER_ERROR);
             return [];
         }
     }

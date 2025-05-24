@@ -4,7 +4,6 @@ namespace Goramax\NoctalysFramework;
 
 use Goramax\NoctalysFramework\Router;
 use Goramax\NoctalysFramework\TemplateEngines\TemplateEngineInterface;
-use Goramax\NoctalysFramework\ErrorHandler;
 
 class View
 {
@@ -25,10 +24,10 @@ class View
         }
         $engineClass = "Goramax\\NoctalysFramework\\TemplateEngines\\" . ucfirst($engine) . "Engine";
         if (!class_exists($engineClass)) {
-            ErrorHandler::fatal("Template engine $engineClass not found"); 
+            throw new \ErrorException("Template engine $engineClass not found", 0, E_USER_ERROR);
         }
         if (!is_subclass_of($engineClass, TemplateEngineInterface::class)) {
-            ErrorHandler::fatal("Template engine $engineClass must implement TemplateEngineInterface");
+            throw new \ErrorException("Template engine $engineClass must implement TemplateEngineInterface", 0, E_USER_ERROR);
         }
         $engineInstance = new $engineClass(Router::getCurrentFolder(), Config::get('template_engine')['options'] ?? []);
 

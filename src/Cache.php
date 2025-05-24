@@ -1,8 +1,6 @@
 <?php
 
 namespace Goramax\NoctalysFramework;
-
-use Goramax\NoctalysFramework\ErrorHandler;
 use Goramax\NoctalysFramework\Config;
 
 class Cache
@@ -48,13 +46,13 @@ class Cache
             // Make sure the cache folder exists
             if (!file_exists(self::$cacheFolder)) {
                 if (!mkdir(self::$cacheFolder, 0755, true)) {
-                    ErrorHandler::warning('Failed to create cache folder: ' . self::$cacheFolder, 'warning', 3);
+                    throw new \ErrorException('Failed to create cache folder: ' . self::$cacheFolder, 0, E_USER_WARNING);
                 }
             }
 
             // If enabled in config but not available, trigger warning
             if (self::$isEnabled && !self::$isAvailable) {
-                ErrorHandler::warning('APCu cache is enabled in configuration but not available on the server', 'warning');
+                throw new \ErrorException('APCu cache is enabled in configuration but not available on the server', 0, E_USER_WARNING);
             }
         }
 

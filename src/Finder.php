@@ -4,8 +4,6 @@ namespace Goramax\NoctalysFramework;
 
 use Goramax\NoctalysFramework\Config;
 use Goramax\NoctalysFramework\Cache;
-use Goramax\NoctalysFramework\ErrorHandler;
-use RecursiveArrayIterator;
 
 class Finder
 {
@@ -134,7 +132,7 @@ class Finder
             
             return $filePath;
         } catch (\Exception $e) {
-            ErrorHandler::fatal("Layout file not found: $fileName", "error", 3);
+            throw new \ErrorException("Layout file not found: $fileName", 0, E_USER_ERROR);
         }
     }
 
@@ -165,8 +163,7 @@ class Finder
             
             return $file;
         } catch (\Exception $e) {
-            ErrorHandler::warning("Component file not found: $fileName", "warn", 3);
-            return "";
+            throw new \ErrorException("Component file not found: $fileName", 0, E_USER_WARNING);
         }
     }
 }
