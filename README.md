@@ -19,3 +19,4 @@ TODO : add CLI installer with demo site
 - [Manipulating Files](./doc/files.md)
 - [Form Helpers](./doc/form.md)
 - [Helpers](./doc/helpers.md)
+- [Validator](./doc/validator.md)

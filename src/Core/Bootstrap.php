@@ -1,8 +1,12 @@
 <?php
 
-namespace Goramax\NoctalysFramework;
+namespace Goramax\NoctalysFramework\Core;
+use Goramax\NoctalysFramework\Services\Env;
+use Goramax\NoctalysFramework\Services\Hooks;
+use Goramax\NoctalysFramework\Routing\Router;
+use Goramax\NoctalysFramework\Routing\RouterApi;
 
-class Core
+class Bootstrap
 {
     public function run()
     {
@@ -17,7 +21,7 @@ class Core
     {
         session_start();
         define("DIRECTORY", getcwd());
-        require_once __DIR__ . '/Helpers/Helpers.php';
+        require_once __DIR__ . '/../Helpers/Helpers.php';
         set_exception_handler([ErrorHandler::class, 'handleException']);
         set_error_handler([ErrorHandler::class, 'handleException']);
         Env::load();

@@ -1,15 +1,15 @@
 <?php
 
-namespace Goramax\NoctalysFramework;
+namespace Goramax\NoctalysFramework\Security;
 
-class Form
+class Csrf
 {
     /**
      * Sets a CSRF token in the session
      * Generates a new token if one does not exist
      * @return string The CSRF token
      */
-    public static function csrf_token(): string
+    public static function token(): string
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
@@ -28,7 +28,7 @@ class Form
      * @param string|null $token The CSRF token to validate
      * @return bool True if the token is valid, false otherwise
      */
-    public static function csrf_check(string|null $token): bool
+    public static function check(string|null $token): bool
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
@@ -43,22 +43,9 @@ class Form
      * Generates a CSRF token input field
      * @return string The CSRF token input field
      */
-    public static function csrf_input(): string
+    public static function input(): string
     {
-        return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars(self::csrf_token(), ENT_QUOTES) . '">';
+        return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars(self::token(), ENT_QUOTES) . '">';
     }
 
-    /**
-     * Gets the old value of a form field
-     * @param string $name The name of the form field
-     * @param mixed $default The default value if the field is not set
-     * @return mixed The old value of the form field or the default value
-     */
-    public static function value(string $name, mixed $default = null): mixed
-    {
-        if (isset($_POST[$name])) {
-            return htmlspecialchars($_POST[$name], ENT_QUOTES);
-        }
-        return $default;
-    }
 }

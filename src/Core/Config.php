@@ -1,6 +1,6 @@
 <?php
 
-namespace Goramax\NoctalysFramework;
+namespace Goramax\NoctalysFramework\Core;
 
 class Config
 {

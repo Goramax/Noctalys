@@ -1,11 +1,10 @@
 <?php
 
-namespace Goramax\NoctalysFramework\TemplateEngines;
+namespace Goramax\NoctalysFramework\View\TemplateEngines;
 
-use Goramax\NoctalysFramework\TemplateEngines\TemplateEngineInterface;
-use Goramax\NoctalysFramework\Finder;
-use Goramax\NoctalysFramework\Hooks;
-use Goramax\NoctalysFramework\Env;
+use Goramax\NoctalysFramework\Utils\Finder;
+use Goramax\NoctalysFramework\Services\Hooks;
+use Goramax\NoctalysFramework\Services\Env;
 use Smarty\Smarty;
 
 class SmartyEngine implements TemplateEngineInterface

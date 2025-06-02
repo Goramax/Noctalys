@@ -42,7 +42,7 @@ Inside `src/Frontend/pages/`, create a new folder with the **page name**:
 ```php
 <?php
 
-use Framework\Core\View;
+use Goramax\NoctalysFramework\View;
 
 class PageNameController {
     public function main() {  // Default method
@@ -53,6 +53,7 @@ class PageNameController {
     }
 }
 ```
+
 The `main()` method is called **automatically** by the router.
 
 ### Create the View

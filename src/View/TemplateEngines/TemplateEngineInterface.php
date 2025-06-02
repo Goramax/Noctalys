@@ -1,6 +1,6 @@
 <?php
 
-namespace Goramax\NoctalysFramework\TemplateEngines;
+namespace Goramax\NoctalysFramework\View\TemplateEngines;
 
 interface TemplateEngineInterface
 {

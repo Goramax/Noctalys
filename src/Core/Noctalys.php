@@ -1,14 +1,12 @@
 <?php
 
-namespace Goramax\NoctalysFramework;
-
-use Goramax\NoctalysFramework\Core;
+namespace Goramax\NoctalysFramework\Core;
 
 class Noctalys {
     protected $core;
 
     public function __construct() {
-        $this->core = new Core();
+        $this->core = new Bootstrap();
     }
 
     public function run() {

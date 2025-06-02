@@ -1,10 +1,9 @@
 <?php
-namespace Goramax\NoctalysFramework\TemplateEngines;
+namespace Goramax\NoctalysFramework\View\TemplateEngines;
 
-use Goramax\NoctalysFramework\TemplateEngines\TemplateEngineInterface;
-use Goramax\NoctalysFramework\Router;
-use Goramax\NoctalysFramework\Finder;
-use Goramax\NoctalysFramework\Hooks;
+use Goramax\NoctalysFramework\Routing\Router;
+use Goramax\NoctalysFramework\Utils\Finder;
+use Goramax\NoctalysFramework\Services\Hooks;
 
 class NoEngine implements TemplateEngineInterface
 {

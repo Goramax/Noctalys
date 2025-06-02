@@ -1,7 +1,7 @@
 <?php
 
-namespace Goramax\NoctalysFramework\Api;
-use Goramax\NoctalysFramework\Hooks;
+namespace Goramax\NoctalysFramework\Http;
+use Goramax\NoctalysFramework\Services\Hooks;
 
 class Request
 {

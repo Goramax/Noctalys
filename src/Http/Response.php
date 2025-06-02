@@ -1,6 +1,6 @@
 <?php
 
-namespace Goramax\NoctalysFramework\Api;
+namespace Goramax\NoctalysFramework\Http;
 
 class Response
 {

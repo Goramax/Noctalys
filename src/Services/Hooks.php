@@ -1,6 +1,6 @@
 <?php
 
-namespace Goramax\NoctalysFramework;
+namespace Goramax\NoctalysFramework\Services;
 
 class Hooks
 {

@@ -1,6 +1,6 @@
 <?php
 
-use Goramax\NoctalysFramework\Form;
+use Goramax\NoctalysFramework\Security\Csrf;
 
 /**
  * Returns the CSRF token
@@ -8,7 +8,7 @@ use Goramax\NoctalysFramework\Form;
  */
 function csrf_token(): string
 {
-    return Form::csrf_token();
+    return Csrf::token();
 }
 
 /**
@@ -20,7 +20,7 @@ function csrf_token(): string
  */
 function csrf_input(): string
 {
-    return Form::csrf_input();
+    return Csrf::input();
 }
 
 /**
@@ -31,7 +31,7 @@ function csrf_input(): string
 function csrf_check(): bool
 {
     if (isset($_POST['csrf_token'])) {
-        return Form::csrf_check($_POST['csrf_token'] ?? null);
+        return Csrf::check($_POST['csrf_token'] ?? null);
     }
     return false;
 }
@@ -44,5 +44,8 @@ function csrf_check(): bool
  */
 function value(string $name, mixed $default = null): mixed
 {
-    return Form::value($name, $default);
+    if (isset($_POST[$name])) {
+        return htmlspecialchars($_POST[$name], ENT_QUOTES);
+    }
+    return $default;
 }

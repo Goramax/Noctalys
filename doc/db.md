@@ -23,7 +23,7 @@ To send queries to the database, you can use the `Db` class. The `Db` class prov
 ### Example
 
 ```php 
-use Framework\Core\Db;
+use Goramax\NoctalysFramework\Db;
 // Gets the post where id = 1
 $post = Db::sql('SELECT * FROM posts WHERE id = :id', ['id' => 1]);
 ```

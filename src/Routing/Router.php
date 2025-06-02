@@ -1,11 +1,11 @@
 <?php
 
-namespace Goramax\NoctalysFramework;
+namespace Goramax\NoctalysFramework\Routing;
 
 use Error;
-use Goramax\NoctalysFramework\Config;
-use Goramax\NoctalysFramework\Hooks;
-use Goramax\NoctalysFramework\Cache;
+use Goramax\NoctalysFramework\Core\Config;
+use Goramax\NoctalysFramework\Services\Hooks;
+use Goramax\NoctalysFramework\Services\Cache;
 
 class Router
 {

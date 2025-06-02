@@ -31,7 +31,7 @@ DB_NAME="my_database"
 
 Since Noctalys uses a custom environment loader, you need to use the Env class to access the environment variables in your application. You can do this by using the `Env::get()` method:
 ```php
-use Framework\Core\Env;
+use Goramax\NoctalysFramework\Env;
 
 // Get the value of the DB_HOST environment variable
 $dbHost = Env::get('DB_HOST');

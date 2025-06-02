@@ -1,7 +1,7 @@
 <?php
 
-namespace Goramax\NoctalysFramework;
-use Goramax\NoctalysFramework\Config;
+namespace Goramax\NoctalysFramework\Services;
+use Goramax\NoctalysFramework\Core\Config;
 
 class Cache
 {
