@@ -1,7 +1,6 @@
 <?php
 
 namespace {
-    // Utilisé par les fonctions helpers
     use Goramax\NoctalysFramework\View\Component;
     use Goramax\NoctalysFramework\Utils\Finder;
     use Goramax\NoctalysFramework\Services\File;

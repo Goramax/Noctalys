@@ -8,8 +8,13 @@
             "Goramax\\NoctalysFramework\\": "src/"
         },
         "files": [
-            "src/Helpers/helpers.php"
+            "src/Helpers/Helpers.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
     },
     "authors": [
         {
@@ -22,6 +27,11 @@
     "suggest": {
         "twig/twig": "Required to use Twig templates",
         "smarty/smarty": "Required to use Smarty templates",
-        "latte/latte": "Required to use Latte templates"
+        "latte/latte": "Required to use Latte templates",
+        "ext-pdo": "Required for database interactions",
+        "ext-apcu": "Required for caching"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
     }
 }

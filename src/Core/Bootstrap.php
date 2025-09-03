@@ -36,7 +36,7 @@ class Bootstrap
     private function routersDispatch($start)
     {
         $currentRoute = $_SERVER['REQUEST_URI'];
-        $apiUrl = Config::get('api')['api_url'];
+        $apiUrl = Config::get('api')['api_url'] ?? ' ';
         $is_api_url = substr($currentRoute, 0, strlen($apiUrl)) === $apiUrl;
 
         if (Config::get('api')['enabled'] && $is_api_url) {

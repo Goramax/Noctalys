@@ -43,7 +43,6 @@ class Config
             return $config;
         } else {
             throw new \ErrorException("Config file not found: $configFile", 0, E_USER_ERROR);
-            return [];
         }
     }
 

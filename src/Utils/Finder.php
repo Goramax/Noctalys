@@ -36,6 +36,7 @@ class Finder
      * @param bool $nested if true, will search in nested directories
      * @param array $limitDirectories directories to limit nested search
      * @return string|null path to the file
+     * @throws \Exception if file is not found
      */
     public static function findFile(string $fileName, array $directories, bool $nested = false, array $limitDirectories = []): ?string
     {
