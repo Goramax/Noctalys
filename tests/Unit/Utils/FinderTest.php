@@ -4,34 +4,29 @@ namespace Tests;
 
 use PHPUnit\Framework\TestCase;
 use Goramax\NoctalysFramework\Utils\Finder;
+use Tests\Helpers\FakeProject;
 
 class FinderTest extends TestCase
 {
-    private string $originalCwd;
-    private string $fakeProjectPath;
-    private bool $canRunTest = false;
+    private FakeProject $fakeProject;
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->canRunTest = true;
-
-        // Setup fake project environment
-        $this->fakeProjectPath = __DIR__ . '/../../fixtures/fake-project';
-        $this->originalCwd = getcwd();
-
-        chdir($this->fakeProjectPath);
         
-        if (!defined('DIRECTORY')) {
-            define('DIRECTORY', $this->fakeProjectPath);
+        $this->fakeProject = new FakeProject();
+        
+        if ($this->fakeProject->canUse()) {
+            $this->fakeProject->setUp();
+        } else {
+            $this->markTestSkipped('Cannot run test: DIRECTORY constant already defined');
         }
     }
 
     protected function tearDown(): void
     {
-        if ($this->canRunTest && isset($this->originalCwd)) {
-            chdir($this->originalCwd);
+        if (isset($this->fakeProject)) {
+            $this->fakeProject->tearDown();
         }
         parent::tearDown();
     }
@@ -51,7 +46,7 @@ class FinderTest extends TestCase
     public function testFindFileReturnsPathForExistingFile()
     {
         // Ensure the test file exists in the fake project structure
-        $testFilePath = $this->fakeProjectPath . '/public/assets/testfile.txt';
+        $testFilePath = $this->fakeProject->getProjectPath() . '/public/assets/testfile.txt';
         if (!file_exists($testFilePath)) {
             file_put_contents($testFilePath, 'Test content');
         }

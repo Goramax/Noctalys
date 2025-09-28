@@ -32,6 +32,44 @@ class FakeProject
         if (!$this->directoryWasDefined) {
             define('DIRECTORY', $this->projectPath);
         }
+        
+        // Ensure critical test files exist
+        $this->ensureCriticalFilesExist();
+    }
+    
+    /**
+     * Ensure critical test files exist in the fake project
+     */
+    private function ensureCriticalFilesExist(): void
+    {
+        $assetsDir = $this->projectPath . '/public/assets';
+        
+        // Create assets directory if it doesn't exist
+        if (!is_dir($assetsDir)) {
+            mkdir($assetsDir, 0777, true);
+        }
+        
+        // Create manifest.json if it doesn't exist
+        $manifestFile = $assetsDir . '/manifest.json';
+        if (!file_exists($manifestFile)) {
+            $manifest = [
+                'main.css' => 'main.css',
+                'main.js' => 'main.js'
+            ];
+            file_put_contents($manifestFile, json_encode($manifest, JSON_PRETTY_PRINT));
+        }
+        
+        // Create main.css if it doesn't exist
+        $cssFile = $assetsDir . '/main.css';
+        if (!file_exists($cssFile)) {
+            file_put_contents($cssFile, "/* Main CSS file for testing */\nbody {\n    font-family: Arial, sans-serif;\n}");
+        }
+        
+        // Create main.js if it doesn't exist
+        $jsFile = $assetsDir . '/main.js';
+        if (!file_exists($jsFile)) {
+            file_put_contents($jsFile, "// Main JS file for testing\nconsole.log('Main JS loaded');");
+        }
     }
     
     /**

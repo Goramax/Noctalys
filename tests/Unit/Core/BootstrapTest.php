@@ -7,6 +7,28 @@ use PHPUnit\Framework\Error\Warning;
 
 class BootstrapTest extends TestCase
 {
+    private FakeProject $fakeProject;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        $this->fakeProject = new FakeProject();
+        
+        if ($this->fakeProject->canUse()) {
+            $this->fakeProject->setUp();
+        } else {
+            $this->markTestSkipped('Cannot run test: DIRECTORY constant already defined');
+        }
+    }
+
+    protected function tearDown(): void
+    {
+        if (isset($this->fakeProject)) {
+            $this->fakeProject->tearDown();
+        }
+        parent::tearDown();
+    }
     public function testBootstrapCanBeInstantiated()
     {
         // Test if Bootstrap can be instantiated
@@ -25,14 +47,6 @@ class BootstrapTest extends TestCase
 
     public function testBootstrapRunDoesNotThrowException()
     {
-        // Simply create a fake project environment
-        $fakeProject = new FakeProject();
-
-        // Setup fake project if DIRECTORY not already defined
-        if (!defined('DIRECTORY')) {
-            $fakeProject->setUp();
-        }
-
         // Clean any existing output buffers and start fresh
         while (ob_get_level()) {
             ob_end_clean();

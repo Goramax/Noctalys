@@ -5,37 +5,32 @@ namespace Tests;
 use PHPUnit\Framework\TestCase;
 use Goramax\NoctalysFramework\Routing\Router;
 use Goramax\NoctalysFramework\Core\Config;
+use Tests\Helpers\FakeProject;
 
 class RouterTest extends TestCase
 {
-
-    private string $originalCwd;
-    private string $fakeProjectPath;
-    private bool $canRunTest = false;
+    private FakeProject $fakeProject;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->canRunTest = true;
+        $this->fakeProject = new FakeProject();
 
-        // Setup fake project environment
-        $this->fakeProjectPath = __DIR__ . '/../../fixtures/fake-project';
-        $this->originalCwd = getcwd();
-
-        chdir($this->fakeProjectPath);
-        define('DIRECTORY', $this->fakeProjectPath);
-
-        $_SERVER['REQUEST_URI'] = $_SERVER['REQUEST_URI'] ?? '/test';
-        
-        // Initialize Config which is required by Router
-        Config::init();
+        if ($this->fakeProject->canUse()) {
+            $this->fakeProject->setUp();
+            $_SERVER['REQUEST_URI'] = $_SERVER['REQUEST_URI'] ?? '/test';
+            // Initialize Config which is required by Router
+            Config::init();
+        } else {
+            $this->markTestSkipped('Cannot run test: DIRECTORY constant already defined');
+        }
     }
 
     protected function tearDown(): void
     {
-        if ($this->canRunTest && isset($this->originalCwd)) {
-            chdir($this->originalCwd);
+        if (isset($this->fakeProject)) {
+            $this->fakeProject->tearDown();
         }
         parent::tearDown();
     }
