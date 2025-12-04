@@ -3,7 +3,7 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-use Goramax\NoctalysFramework\Services\File;
+use Noctalys\Framework\Services\File;
 use Tests\Helpers\FakeProject;
 
 class FileTest extends TestCase

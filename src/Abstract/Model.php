@@ -1,6 +1,6 @@
 <?php
 
-namespace Goramax\NoctalysFramework\Abstract;
+namespace Noctalys\Framework\Abstract;
 abstract class Model
 {
     public static function fromArray(array $data): static

@@ -1,6 +1,6 @@
 <?php
 
-namespace Goramax\NoctalysFramework\Security;
+namespace Noctalys\Framework\Security;
 
 class Validator
 {

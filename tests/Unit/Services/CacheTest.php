@@ -3,8 +3,8 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-use Goramax\NoctalysFramework\Services\Cache;
-use Goramax\NoctalysFramework\Core\Config;
+use Noctalys\Framework\Services\Cache;
+use Noctalys\Framework\Core\Config;
 use Tests\Helpers\FakeProject;
 
 class CacheTest extends TestCase

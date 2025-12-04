@@ -1,5 +1,5 @@
 <?php
-namespace Goramax\NoctalysFramework\Services;
+namespace Noctalys\Framework\Services;
 
 use Exception;
 

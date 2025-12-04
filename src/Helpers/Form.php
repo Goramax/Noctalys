@@ -1,6 +1,6 @@
 <?php
 
-use Goramax\NoctalysFramework\Security\Csrf;
+use Noctalys\Framework\Security\Csrf;
 
 /**
  * Returns the CSRF token

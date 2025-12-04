@@ -1,6 +1,6 @@
 <?php
 
-namespace Goramax\NoctalysFramework\Attributes;
+namespace Noctalys\Framework\Attributes;
 
 #[\Attribute(\Attribute::TARGET_METHOD)]
 class Route

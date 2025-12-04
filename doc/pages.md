@@ -42,7 +42,7 @@ Inside `src/Frontend/pages/`, create a new folder with the **page name**:
 ```php
 <?php
 
-use Goramax\NoctalysFramework\View;
+use Noctalys\Framework\View;
 
 class PageNameController {
     public function main() {  // Default method

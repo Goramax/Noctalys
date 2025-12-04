@@ -3,7 +3,7 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-use Goramax\NoctalysFramework\Services\Hooks;
+use Noctalys\Framework\Services\Hooks;
 use Tests\Helpers\FakeProject;
 
 class HooksTest extends TestCase
@@ -197,7 +197,7 @@ class HooksTest extends TestCase
     {
         // Create a hooks.php file
         $hooksContent = "<?php
-use Goramax\NoctalysFramework\Services\Hooks;
+use Noctalys\Framework\Services\Hooks;
 
 Hooks::add('setup_test_hook', function() {
     global \$hookSetupExecuted;

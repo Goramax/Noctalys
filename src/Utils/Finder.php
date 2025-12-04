@@ -1,9 +1,9 @@
 <?php
 
-namespace Goramax\NoctalysFramework\Utils;
+namespace Noctalys\Framework\Utils;
 
-use Goramax\NoctalysFramework\Core\Config;
-use Goramax\NoctalysFramework\Services\Cache;
+use Noctalys\Framework\Core\Config;
+use Noctalys\Framework\Services\Cache;
 
 class Finder
 {

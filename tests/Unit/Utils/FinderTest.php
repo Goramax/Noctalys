@@ -3,7 +3,7 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-use Goramax\NoctalysFramework\Utils\Finder;
+use Noctalys\Framework\Utils\Finder;
 use Tests\Helpers\FakeProject;
 
 class FinderTest extends TestCase

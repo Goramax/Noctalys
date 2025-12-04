@@ -1,10 +1,10 @@
 <?php
 
-namespace Goramax\NoctalysFramework\View;
+namespace Noctalys\Framework\View;
 
-use Goramax\NoctalysFramework\Routing\Router;
-use Goramax\NoctalysFramework\Core\Config;
-use Goramax\NoctalysFramework\View\TemplateEngines\TemplateEngineInterface;
+use Noctalys\Framework\Routing\Router;
+use Noctalys\Framework\Core\Config;
+use Noctalys\Framework\View\TemplateEngines\TemplateEngineInterface;
 
 class View
 {
@@ -23,7 +23,7 @@ class View
                 $engine = 'no';
             }
         }
-        $engineClass = "Goramax\\NoctalysFramework\\View\\TemplateEngines\\" . ucfirst($engine) . "Engine";
+    $engineClass = "Noctalys\\Framework\\View\\TemplateEngines\\" . ucfirst($engine) . "Engine";
         if (!class_exists($engineClass)) {
             throw new \ErrorException("Template engine $engineClass not found", 0, E_USER_ERROR);
         }

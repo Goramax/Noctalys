@@ -3,7 +3,7 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-use Goramax\NoctalysFramework\Services\Env;
+use Noctalys\Framework\Services\Env;
 use Tests\Helpers\FakeProject;
 
 class EnvTest extends TestCase

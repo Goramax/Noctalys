@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Goramax\NoctalysFramework\Core\Bootstrap;
+use Noctalys\Framework\Core\Bootstrap;
 use Tests\Helpers\FakeProject;
 use PHPUnit\Framework\Error\Warning;
 

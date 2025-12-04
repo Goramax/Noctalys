@@ -1,6 +1,6 @@
 <?php
 
-use Goramax\NoctalysFramework\View\View;
+use Noctalys\Framework\View\View;
 
 /**
  * Home page controller

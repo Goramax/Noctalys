@@ -3,8 +3,8 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-use Goramax\NoctalysFramework\Routing\Router;
-use Goramax\NoctalysFramework\Core\Config;
+use Noctalys\Framework\Routing\Router;
+use Noctalys\Framework\Core\Config;
 use Tests\Helpers\FakeProject;
 
 class RouterTest extends TestCase

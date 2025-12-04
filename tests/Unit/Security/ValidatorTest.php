@@ -3,7 +3,7 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-use Goramax\NoctalysFramework\Security\Validator;
+use Noctalys\Framework\Security\Validator;
 use Tests\Helpers\FakeProject;
 
 class ValidatorTest extends TestCase

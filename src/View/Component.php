@@ -1,9 +1,9 @@
 <?php
 
-namespace Goramax\NoctalysFramework\View;
+namespace Noctalys\Framework\View;
 
-use Goramax\NoctalysFramework\Utils\Finder;
-use Goramax\NoctalysFramework\Services\Hooks;
+use Noctalys\Framework\Utils\Finder;
+use Noctalys\Framework\Services\Hooks;
 
 class Component
 {

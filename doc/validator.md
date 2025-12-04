@@ -15,7 +15,7 @@ The `Validator` class in NoctalysFramework provides a fluent, chainable API for 
 ### Basic Example
 
 ```php
-use Goramax\NoctalysFramework\Validator;
+use Noctalys\Framework\Validator;
 
 $result = Validator::validate($value)
     ->required()

@@ -32,7 +32,7 @@
 To run a hook, use the `run()` method from the `Hooks` class where you want the hook to be executed.   
 For example:
 ```php
-use Goramax\NoctalysFramework\Hooks;
+use Noctalys\Framework\Services\Hooks;
 
 Hooks::run('my_custom_hook', ...$params);
 ```
@@ -43,7 +43,7 @@ You can pass any number of parameters to the hook, and they will be passed to th
 To register a hook, use the `add()` method from the `Hooks` class.  
 For example:
 ```php
-use Goramax\NoctalysFramework\Hooks;
+use Noctalys\Framework\Services\Hooks;
 
 Hooks::add('before_dispatch', function() {
     // Code to execute before the route is dispatched
@@ -68,7 +68,7 @@ This consistent approach allows for seamless hook usage regardless of the templa
 Here's an example of using hooks to add analytics code to every page:
 
 ```php
-use Goramax\NoctalysFramework\Hooks;
+use Noctalys\Framework\Services\Hooks;
 
 Hooks::add('after_view', function($view, $viewFile, $layout, $data) {
     // Log page view to analytics service
@@ -83,7 +83,7 @@ You can centralize your hook registrations in the `hooks.php` file at the root o
 ### Example:
 ```php
 // noctalys-app/hooks.php
-use Goramax\NoctalysFramework\Hooks;
+use Noctalys\Framework\Services\Hooks;
 
 Hooks::add('before_view', function($view, $viewFile, $layout, $data) {
     // Custom logic before any view is rendered
@@ -95,7 +95,7 @@ Hooks::add('before_view', function($view, $viewFile, $layout, $data) {
 You can also use hooks to specific layout/view/component names. For example, if you want to execute a hook before rendering a specific layout, you can do it like this:
 
 ```php
-use Goramax\NoctalysFramework\Hooks;
+use Noctalys\Framework\Services\Hooks;
 
 Hooks::add('before_layout_logged', function($viewFile, $layoutFile, $data) {
     // Check if the user is logged in

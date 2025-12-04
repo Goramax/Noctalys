@@ -5,7 +5,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Goramax\\NoctalysFramework\\": "src/"
+            "Noctalys\\Framework\\": "src/"
         },
         "files": [
             "src/Helpers/Helpers.php"

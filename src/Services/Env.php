@@ -1,8 +1,8 @@
 <?php
 
-namespace Goramax\NoctalysFramework\Services;
+namespace Noctalys\Framework\Services;
 
-use Goramax\NoctalysFramework\Core\Config;
+use Noctalys\Framework\Core\Config;
 class Env
 {
     private static bool $loaded = false;

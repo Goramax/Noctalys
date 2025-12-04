@@ -18,7 +18,7 @@ The `upload()` method allows you to upload files from a form submission to a spe
 
 ### Example
 ```php
-use Goramax\NoctalysFramework\File;
+use Noctalys\Framework\File;
 
 $file = File::upload('file_input', 'uploads');
 if ($file) {

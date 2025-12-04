@@ -3,7 +3,7 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-use Goramax\NoctalysFramework\Core\Config;
+use Noctalys\Framework\Core\Config;
 use Tests\Helpers\FakeProject;
 
 class ConfigTest extends TestCase

@@ -3,7 +3,7 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-use Goramax\NoctalysFramework\Security\Csrf;
+use Noctalys\Framework\Security\Csrf;
 use Tests\Helpers\FakeProject;
 
 class CsrfTest extends TestCase

@@ -3,7 +3,7 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-use Goramax\NoctalysFramework\Services\Asset;
+use Noctalys\Framework\Services\Asset;
 use Tests\Helpers\FakeProject;
 
 class AssetTest extends TestCase

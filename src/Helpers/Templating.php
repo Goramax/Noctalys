@@ -1,11 +1,11 @@
 <?php
 
 namespace {
-    use Goramax\NoctalysFramework\View\Component;
-    use Goramax\NoctalysFramework\Utils\Finder;
-    use Goramax\NoctalysFramework\Services\File;
-    use Goramax\NoctalysFramework\Services\Asset;
-    use Goramax\NoctalysFramework\Services\Hooks;
+    use Noctalys\Framework\View\Component;
+    use Noctalys\Framework\Utils\Finder;
+    use Noctalys\Framework\Services\File;
+    use Noctalys\Framework\Services\Asset;
+    use Noctalys\Framework\Services\Hooks;
 
     const PUBLIC_ASSETS_FOLDER = [
         'sources' => [

@@ -59,7 +59,7 @@ class FormController
 
 Or use the `csrf_check()` function frol the `Form` class, which takes the token as an argument for custom token validation.
 ```php
-use Goramax\NoctalysFramework\Form;
+use Noctalys\Framework\Form;
 
 class FormController
 {
@@ -90,7 +90,7 @@ Then, in your controller, you can use the `upload()` function from the `File` cl
 
 **controller**
 ```php
-use Goramax\NoctalysFramework\File;
+use Noctalys\Framework\File;
 class FormController
 {
     public function main()

@@ -1,10 +1,11 @@
 <?php
 
-namespace Goramax\NoctalysFramework\Core;
-use Goramax\NoctalysFramework\Services\Env;
-use Goramax\NoctalysFramework\Services\Hooks;
-use Goramax\NoctalysFramework\Routing\Router;
-use Goramax\NoctalysFramework\Routing\RouterApi;
+namespace Noctalys\Framework\Core;
+use Noctalys\Framework\Services\Env;
+use Noctalys\Framework\Services\Hooks;
+use Noctalys\Framework\Routing\Router;
+use Noctalys\Framework\Routing\RouterApi;
+use Noctalys\Framework\Core\Config;
 
 class Bootstrap
 {

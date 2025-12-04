@@ -1,12 +1,12 @@
 <?php
 
-namespace Goramax\NoctalysFramework\Routing;
+namespace Noctalys\Framework\Routing;
 
-use Goramax\NoctalysFramework\Http\Response;
-use Goramax\NoctalysFramework\Attributes\Route;
-use Goramax\NoctalysFramework\Core\Config;
-use Goramax\NoctalysFramework\Services\Cache;
-use Goramax\NoctalysFramework\Services\Hooks;
+use Noctalys\Framework\Http\Response;
+use Noctalys\Framework\Attributes\Route;
+use Noctalys\Framework\Core\Config;
+use Noctalys\Framework\Services\Cache;
+use Noctalys\Framework\Services\Hooks;
 use ReflectionClass;
 use ReflectionMethod;
 

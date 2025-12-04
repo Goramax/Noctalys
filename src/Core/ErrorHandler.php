@@ -1,9 +1,9 @@
 <?php
 
-namespace Goramax\NoctalysFramework\Core;
+namespace Noctalys\Framework\Core;
 
 use Exception;
-use Goramax\NoctalysFramework\Services\Hooks;
+use Noctalys\Framework\Services\Hooks;
 
 class ErrorHandler
 {

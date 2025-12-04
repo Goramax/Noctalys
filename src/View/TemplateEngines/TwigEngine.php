@@ -1,10 +1,10 @@
 <?php
 
-namespace Goramax\NoctalysFramework\View\TemplateEngines;
+namespace Noctalys\Framework\View\TemplateEngines;
 
-use Goramax\NoctalysFramework\Utils\Finder;
-use Goramax\NoctalysFramework\Services\Hooks;
-use Goramax\NoctalysFramework\Services\Env;
+use Noctalys\Framework\Utils\Finder;
+use Noctalys\Framework\Services\Hooks;
+use Noctalys\Framework\Services\Env;
 use \Twig\Environment;
 use \Twig\Loader\FilesystemLoader;
 use \Twig\TwigFunction;
