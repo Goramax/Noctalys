@@ -1,3 +1,2 @@
 # Composer dependencies
 /vendor/
-.phpunit.cache/
