@@ -1,12 +1,19 @@
 {
-    "name": "goramax/noctalys-framework",
-    "description": "A Simple PHP Lightweight Framework",
-    "version": "0.0.0",
+    "name": "noctalys/framework",
+    "description": "A modern and lightweight PHP framework",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Goramax\\NoctalysFramework\\": "src/Noctalys/"
+            "Noctalys\\Framework\\": "src/"
+        },
+        "files": [
+            "src/Helpers/Helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
         }
     },
     "authors": [
@@ -16,5 +23,15 @@
     ],
     "require": {
         "php": ">=8.2"
+    },
+    "suggest": {
+        "twig/twig": "Required to use Twig templates",
+        "smarty/smarty": "Required to use Smarty templates",
+        "latte/latte": "Required to use Latte templates",
+        "ext-pdo": "Required for database interactions",
+        "ext-apcu": "Required for caching"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
     }
 }
