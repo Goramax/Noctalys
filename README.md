@@ -6,7 +6,7 @@ Noctalys is a simple, lightweight PHP framework designed for simple and fast dev
 
 ## Installation
 
-TODO : add CLI installer with demo site
+Check noctalys/cli for a CLI tool to create and manage Noctalys projects.
 
 ## Documentation
 - [Getting Started](./doc/getting-started.md)
@@ -15,8 +15,8 @@ TODO : add CLI installer with demo site
 - [Create and use Hooks](./doc/hooks.md)
 - [Env files](./doc/env.md)
 - [Configuration](./doc/config.md)
-- [Connect to a database](./doc/database.md)
-- [Manipulating Files](./doc/files.md)
+- [Connect to a database](./doc/db.md)
+- [Manipulating Files](./doc/file.md)
 - [Form Helpers](./doc/form.md)
 - [Helpers](./doc/helpers.md)
 - [Validator](./doc/validator.md)
