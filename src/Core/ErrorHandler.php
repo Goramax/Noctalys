@@ -50,11 +50,13 @@ class ErrorHandler
             margin: 20px 0;
             color: #f8f8f8;
             font-weight: 800;
+            max-width: 100%;
         }
         .noctalys-fatal p {
             color: #f8f8f8;
             font-size: 16px;
             margin: 10px 0;
+            max-width: 100%;
         }
         .noctalys-fatal pre {
             padding: 10px;

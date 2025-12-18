@@ -6,6 +6,7 @@ namespace {
     use Noctalys\Framework\Services\File;
     use Noctalys\Framework\Services\Asset;
     use Noctalys\Framework\Services\Hooks;
+    use Noctalys\Framework\Routing\Router;
 
     const PUBLIC_ASSETS_FOLDER = [
         'sources' => [
@@ -143,6 +144,58 @@ namespace {
         } catch (Exception $e) {
             trigger_error($e->getMessage(), E_USER_WARNING);
             return "";
+        }
+    }
+
+    /**
+     * Generates style tag for css of current page if file exists
+     * @return string|null
+     */
+    function page_css(): string | null
+    {
+        try {
+            $currentFolder = Router::getCurrentFolder();
+
+            if (empty($currentFolder)) return null;
+
+            $pageName = basename($currentFolder);
+
+            if (empty($pageName)) return null;
+
+            $cssFile = $currentFolder . DIRECTORY_SEPARATOR . $pageName . '.css';
+
+            if (!file_exists($cssFile)) return null;
+
+            $content = file_get_contents($cssFile);
+            return "<style>\n" . $content . "\n</style>";
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Generates script tag for js of current page if file exists
+     * @return string|null
+     */
+    function page_js(): string | null
+    {
+        try {
+            $currentFolder = Router::getCurrentFolder();
+
+            if (empty($currentFolder)) return null;
+
+            $pageName = basename($currentFolder);
+
+            if (empty($pageName)) return null;
+
+            $jsFile = $currentFolder . DIRECTORY_SEPARATOR . $pageName . '.js';
+
+            if (!file_exists($jsFile)) return null;
+
+            $content = file_get_contents($jsFile);
+            return "<script type=\"module\">\n" . $content . "\n</script>";
+        } catch (\Throwable $e) {
+            return null;
         }
     }
 
