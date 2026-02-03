@@ -7,6 +7,7 @@
  */
 function cast_value($value): mixed
 {
+    $baseValue = $value;
     $value = strtolower($value);
 
     return match (true) {
@@ -15,7 +16,7 @@ function cast_value($value): mixed
         $value === 'null' => null,
         is_numeric($value) && str_contains($value, '.') => (float)$value,
         is_numeric($value) => (int)$value,
-        default => $value,
+        default => $baseValue,
     };
 }
 
